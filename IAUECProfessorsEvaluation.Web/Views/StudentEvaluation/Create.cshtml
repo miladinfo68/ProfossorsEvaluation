@@ -1,0 +1,426 @@
+﻿@model IAUECProfessorsEvaluation.Web.Models.EvaluationQuestionModel
+@{
+    var terms = ViewBag.Terms as Dictionary<int, string>;
+    var types = ViewBag.Types as Dictionary<int, string>;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .row {
+        margin-bottom: 5px;
+    }
+
+    .form-control {
+        border-radius: 4px;
+    }
+</style>
+<style>
+    .row-search div {
+        float: right;
+    }
+
+    .btnAdd {
+        width: 30px;
+        height: 30px;
+        border-radius: 100%;
+        margin: 15px !important;
+        background: #82c8a0;
+        list-style-type: disc;
+        border: none;
+    }
+
+    .btnDelete {
+        width: 30px;
+        height: 30px;
+        border-radius: 100%;
+        margin: 15px !important;
+        background: #82c8a0;
+        list-style-type: disc;
+        border: none;
+    }
+
+    .fa-times {
+        display: none;
+        cursor: pointer;
+    }
+
+    .row-search:hover .fa-times {
+        display: inline-block;
+    }
+
+    .container-and-value {
+        display: none;
+    }
+
+    .container-or-value {
+        padding-top: 25px;
+        display: none;
+    }
+
+    .container-and-value {
+        padding-top: 25px;
+        display: none;
+    }
+
+    .container-or-value input {
+        display: inline-block;
+    }
+
+    .container-and-value input {
+        display: inline-block;
+    }
+
+
+
+    .container-date-or-value {
+        padding-top: 25px;
+        display: none;
+    }
+
+    .container-date-and-value {
+        padding-top: 25px;
+        display: none;
+    }
+
+    .container-date-value {
+        display: none;
+    }
+
+    .container-date-or-value input {
+        display: inline-block;
+    }
+
+    .container-date-and-value input {
+        display: inline-block;
+    }
+
+    .container-search-result {
+        display: none;
+    }
+
+    .date-time {
+        display: none;
+    }
+</style>
+<style>
+    /*Page styles*/
+    html {
+        height: 100%;
+    }
+
+    body {
+        height: 100%;
+        margin: 0;
+        background: #363636;
+        display: -webkit-flex;
+        display: flex;
+        align-items: center;
+    }
+
+    .boxes {
+        margin: auto;
+        padding: 50px;
+        background: #484848;
+    }
+
+    /*Checkboxes styles*/
+    input[type="checkbox"] {
+        display: none;
+    }
+
+        input[type="checkbox"] + label {
+            display: block;
+            position: relative;
+            padding-left: 35px;
+            margin-bottom: 20px;
+            font: 14px/20px 'Open Sans', Arial, sans-serif;
+            color: #ddd;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+            input[type="checkbox"] + label:last-child {
+                margin-bottom: 0;
+            }
+
+            input[type="checkbox"] + label:before {
+                content: '';
+                display: block;
+                width: 20px;
+                height: 20px;
+                border: 1px solid #6cc0e5;
+                position: absolute;
+                left: 0;
+                top: 0;
+                opacity: .6;
+                -webkit-transition: all .12s, border-color .08s;
+                transition: all .12s, border-color .08s;
+            }
+
+        input[type="checkbox"]:checked + label:before {
+            width: 10px;
+            top: -5px;
+            left: 5px;
+            border-radius: 0;
+            opacity: 1;
+            border-top-color: transparent;
+            border-left-color: transparent;
+            -webkit-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+</style>
+<style>
+    .pcalBtn {
+        position: absolute;
+        top: 28px;
+        left: 16px;
+        width: 50px !important;
+        height: 50px !important;
+    }
+</style>
+
+<div class="panel panel-primary">
+    <div class="panel-heading">ایجاد سوال جدید</div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-lg-3 col-md-3 col-xs-12">
+                <label>نوع سوال :</label>
+                <select class="form-control" id="questionType">
+                    <option value="0">انتخاب کنید</option>
+                    <option value="1">سوال تشریحی</option>
+                    <option value="2">سوال تستی</option>
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-3 col-xs-12">
+                <label>دسته بندی :</label>
+                <select class="form-control" id="type">
+                    <option value="0">انتخاب کنید</option>
+                    @foreach (var item in types)
+                    {
+                        <option value="@(item.Key)">@(item.Value)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-3 col-xs-12">
+                <label>ترم :</label>
+                <select class="form-control" id="term">
+                    <option value="0">انتخاب کنید</option>
+                    @foreach (var item in terms)
+                    {
+                        <option value="@(item.Key)">@(item.Value)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-3 col-xs-12 container-chart-type">
+                <label>نمایش به صورت :</label>
+                <select class="form-control" id="ChartId">
+                    <option value="1">ستونی</option>
+                    <option value="2">دایره ای</option>
+                    <option selected value="3">ستونی دو بعدی</option>
+                    <option value="4">دایره ای دو بعدی</option>
+                    <option value="5">هرم</option>
+                    <option value="6">هرم دو بعدی</option>
+                </select>
+            </div>
+
+        </div>
+        <div class="row" style="margin-top:15px;margin-bottom:10px;">
+            <div class="col-lg-3 col-md-3 col-xs-12">
+                <label for="StartDate">تاریخ شروع</label>
+                <input type="text" id="StartDate" class="pdate form-control" />
+                <script>
+                    var objCal1 = new AMIB.persianCalendar('StartDate');
+                </script>
+            </div>
+            <div class="col-lg-3 col-md-3 col-xs-12">
+                <label for="EndDate">تاریخ پایان</label>
+                <input type="text" id="EndDate" class="pdate form-control" />
+                <script>
+                    var objCal2 = new AMIB.persianCalendar('EndDate');
+                </script>
+            </div>
+            <div class="col-lg-3 col-md-3 col-xs-12 container-comment-question" style="padding-top: 30px;">
+                <input type="checkbox" id="isPossibilityToInsertComment">
+                <label for="isPossibilityToInsertComment" style="color:black">امکان درج کامنت داشته باشد؟</label>
+            </div>
+            <div class="col-lg-3 col-md-3 col-xs-12 container-last-question" style="padding-top: 30px;">
+                <input type="checkbox" id="box-1">
+                <label for="box-1" style="color:black">به عنوان آخرین سوال درج شود؟</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-xs-12">
+                <textarea class="form-control" id="question" placeholder="متن سوال"></textarea>
+            </div>
+        </div>
+
+        <div class="container-answer" style="display:none;">
+            <div class="row row-search">
+                <div class="col-lg-8 col-md-8 col-xs-12" style="margin-top: 13px;">
+                    <textarea class="form-control txt-answer" placeholder="متن جواب"></textarea>
+                </div>
+                <div class="col-lg-2 col-md-2 col-xs-12" style="margin-top: 23px;">
+                    <input type="text" class="form-control txt-sorce" placeholder="نمره جواب" />
+                </div>
+                <div class="col-lg-2 col-md-2 col-xs-2" style="padding-top:10px;padding-right: 70px;">
+                    <button class="btnAdd">
+                        <i class="fa fa-plus" aria-hidden="true"></i>
+                    </button>
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="float: left;padding:7px;">
+            <button class="btn btn-success" style="min-width: 70px;" id="btnInsert">
+                ثبت
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#questionType").change(function () {
+        if ($(this).val()==1) {
+            $(".container-answer").css("display", "none");
+            $(".container-chart-type").css("display", "none");
+            $(".container-comment-question").css("display", "none");
+            $(".container-last-question").css("display", "none");
+        } else {
+            $(".container-answer").css("display", "block");
+            $(".container-chart-type").css("display", "block");
+            $(".container-comment-question").css("display", "block");
+
+            $(".container-last-question").css("display", "block");
+
+
+        }
+    });
+    //$("#type").change(function () {
+    //    debugger;
+    //    var termId = $(this).val();
+    //    if (termId == "2") {
+    //        $(".container-last-question").css("display", "none");
+    //    } else {
+    //        if ($("#questionType").val() != 1) {
+    //            $(".container-last-question").css("display", "block");
+    //        }
+
+    //    }
+    //})
+    var newUrl= '@Url.Action("IndexQuestion","StudentEvaluation")';
+    $(".btnAdd").click(function () {
+        btn_add_click();
+    });
+    $(".fa-times").click(function () {
+        var length = $('.row-search').length;
+        if (length > 1) {
+            $(this).closest('.row-search').remove();
+        }
+    });
+    function btn_add_click() {
+        var $template = $('<div class="row row-search"><div class="col-lg-8 col-md-8 col-xs-12" style="margin-top: 13px;"><textarea class="form-control txt-answer" placeholder="متن جواب"></textarea></div>'
+            +'<div class="col-lg-2 col-md-2 col-xs-12" style="margin-top: 23px;"><input type="text" class="form-control txt-sorce" placeholder="نمره جواب" /></div>'
+            + '<div class="col-lg-2 col-md-2 col-xs-2" style="padding-top:10px;padding-right: 70px;"><button class="btnAdd"><i class="fa fa-plus" aria-hidden="true"></i></button>'
+            + '<i class="fa fa-times" aria-hidden="true"></i></div></div>');
+        $template.find('.btnAdd').click(function () {
+            btn_add_click();
+        });
+        $template.find('.fa-times').click(function () {
+            var length = $('.row-search').length;
+            if (length > 1) {
+                $(this).closest('.row-search').remove();
+            }
+        });
+        $('.container-answer').append($template);
+    }
+
+    $("#btnInsert").click(function () {
+        var isAllowToInsert = true;
+        var question = $("#question").val();
+        var termId = $("#term").val();
+        var typeId = $("#type").val();
+        var isLastQuestion = $("#box-1").is(':checked');
+        var isPossibilityToInsertComment = $("#isPossibilityToInsertComment").is(':checked');
+        var answers = [];
+         if (typeId == 0) {
+             alert("لطفا دسته بندی را انتخاب نمایید");
+             isAllowToInsert = false;
+            return;
+        }
+        if (termId == 0) {
+            alert("لطفا ترم را انتخاب نمایید");
+             isAllowToInsert = false;
+            return;
+        }
+        if ($.trim(question) == "") {
+            alert("متن سوال نمیتواند خالی باشد");
+             isAllowToInsert = false;
+            return;
+        }
+        $(".row-search").each(function () {
+            var answer = $(this).find(".txt-answer").val();
+            var score = $(this).find(".txt-sorce").val();
+            var newModel = answer + "-" + score;
+            answers.push(newModel);
+        });
+        for (var i = 0; i < answers.length; i++) {
+            if ($.trim(answers[i]) == "") {
+                alert("لطفا متن جواب را وارد نمایید");
+                 isAllowToInsert = false;
+                return;
+            }
+        }
+        if ($("#questionType").val() == 2) {
+              $(".txt-sorce").each(function () {
+                if (    $(this).val() < 1 || $(this).val() > 10 ) {
+                    alert("نمره ی سوال باید عددی بین 1 تا 10 باشد.");
+                     isAllowToInsert = false;
+                    return;
+                }
+                return;
+
+              });
+        }
+
+        if (isAllowToInsert) {
+            $.ajax({
+            type: "POST",
+            //url: "/StudentEvaluation/Insert",
+            url: '@Url.Action("Insert","StudentEvaluation")',
+            beforeSend: function () {
+                $('.loadingWrapper').show();
+            },
+            data: {
+                question: question,
+                termId: termId,
+                answers: answers,
+                typeId:typeId,
+                isLastQuestion: isLastQuestion,
+                ChartId: $("#ChartId").val(),
+                isPossibilityToInsertComment: isPossibilityToInsertComment,
+                questionType: $("#questionType").val(),
+                StartDate: $("#StartDate").val(),
+                EndDate: $("#EndDate").val()
+            },
+            success: function (e) {
+                debugger;
+                window.location.href = newUrl;
+
+            },
+            error: function (xhr, status, error) {
+                var errorMessage = xhr.status + ': ' + xhr.statusText;
+                console.log(errorMessage);
+
+            },
+            complete: function () {
+                 $('.loadingWrapper').hide();
+            }
+        });
+        }
+
+    })
+</script>

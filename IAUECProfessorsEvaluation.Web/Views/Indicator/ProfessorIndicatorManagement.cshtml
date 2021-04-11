@@ -1,0 +1,139 @@
+﻿@{Layout = "~/Views/Shared/_Layout.cshtml";}
+@using GridMvc.Html
+@model List<IAUECProfessorsEvaluation.Web.Models.Indicator>
+
+<style>
+    .btn-fixedWidth{width: 100px;}
+</style>
+
+@*<div class="row">
+        <div class="col-sm-12">
+            <a href="/" class="btn btn-success" id="AddProfessorIndicator" ><i class="fa fa-plus-circle "></i> افزودن شاخص جدید</a>
+        </div>
+    </div>*@
+<div class="row">
+    <div class="col-sm-12">
+        @(Html
+    .Grid(Model)
+    .Columns(columns =>
+    {
+        columns.Add(model => model.Name).Titled("عنوان");
+        columns.Add(model => model.Ratio.Name).Titled("اهمیت");
+        columns.Add(model => model.Id).Titled("عملیات")
+            .Encoded(false).Sanitized(false)
+            .RenderValueAs(o => "<a id=\"UpdateProfessorIndicator\" href=\"/\" class=\"btn btn-info\" data-id=\"" + o.Id + "\"><i class=\"fa fa-pencil\"></i> ویرایش</a><a id=\"DeleteProfessorIndicator\" href=\"/\" class=\"btn " + ((bool)o.IsActive ? "btn-warning" : "btn-default") + " btn-fixedWidth\" data-id=\"" + o.Id + "\">" + ((bool)o.IsActive ? "غیر فعالسازی" : "فعالسازی") + "</a>");
+    })
+    .Filterable()
+    .Sortable()
+    .WithPaging(20)
+    .EmptyText("موردی جهت نمایش یافت نشد.")
+    .SetLanguage("fa")
+        )
+    </div>
+</div>
+<div id="dialog"></div>
+
+<script type="text/javascript">
+    $(function () {
+        $(document).on('click', '#AddProfessorIndicator', function () {
+            var href = "/Indicator/AddOrUpdateProfessorIndicator";
+            $('#dialog').dialog({
+                modal: true,
+                open: function (event, ui) {
+                    $(this).load(href, function (result) {
+                        $('#AddOrUpdateProfessorIndicatorForm').submit(function () {
+                            $.ajax({
+                                url: this.action,
+                                type: this.method,
+                                data: $(this).serialize(),
+                                success: function (json) {
+                                    //$('#dialog').dialog('close');
+                                    window.location.href = window.location.href;
+                                    //$('#NewValue').val(json.newValue);
+                                }
+                            });
+                            return false;
+                        });
+                    });
+                },
+                width: 768,
+                maxHeight: 600,
+                minHeight: 600,
+                position: { my: 'center top', at: 'center top' },
+                close: function (event, ui) {
+
+                    $('#dialog').html('');
+                }
+            });
+            return false;
+        });
+
+        $(document).on('click', '#UpdateProfessorIndicator', function () {
+            var href = "/Indicator/AddOrUpdateProfessorIndicator/" + $(this).data("id");
+            $('#dialog').dialog({
+                modal: true,
+                open: function (event, ui) {
+                    $(this).load(href, function (result) {
+                        $('#AddOrUpdateProfessorIndicatorForm').submit(function () {
+
+                            $.ajax({
+                                url: this.action,
+                                type: this.method,
+                                data: $(this).serialize(),
+                                success: function (json) {
+                                    //  $('#dialog').dialog('close');
+                                    window.location.href = window.location.href;
+                                }
+                            });
+                            return false;
+                        });
+                    });
+                },
+                width: 768,
+                maxHeight: 600,
+                minHeight: 600,
+                position: { my: 'center top', at: 'center top' },
+                close: function (event, ui) {
+
+                    $('#dialog').html('');
+                }
+            });
+            return false;
+        });
+
+        $(document).on('click', '#DeleteProfessorIndicator', function (e) {
+            e.preventDefault();
+            var btn = $(this);
+            $.ajax({
+                url: '/Indicator/EnableOrDisableIndicator',
+                type: 'POST',
+                contentType: "application/json",
+                dataType: "json",
+                data: "{'Id':'" + $(this).data("id") + "'}",
+                success: function (json) {
+                    if (json.status)
+                        btn.html('غیر فعال');
+                    else
+                        btn.html('فعال');
+                }
+            });
+
+
+
+            //var href = "/Indicator/DeleteProfessorIndicator";
+            //if (confirm('آیا از حذف این شاخص اطمینان دارید?')) {
+            //    $.ajax({
+            //        url: href,
+            //        contentType: "application/json",
+            //        dataType: "json",
+            //        type: 'POST',
+            //        data: "{'Id':'" + $(this).data("id") + "'}",
+            //        success: function (json) {
+            //            window.location.href = window.location.href;
+            //        }
+            //    });
+            //}
+            //return false;
+        });
+    });
+</script>

@@ -1,0 +1,131 @@
+﻿@using GridMvc.Html
+@model List<IAUECProfessorsEvaluation.Model.Models.EducationalGroup>
+@{
+    ViewBag.Title = "گزارش مدیران گروه ها";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var canChangeCollege = Session["UserInfo"] != null
+        && (((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsAdministrator || ((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsPowerUser);
+}
+
+<style type='text/css'>
+    .searchRow {
+        border-bottom: 1px solid #ccc;
+        background: #ddd;
+        margin-left: -20px;
+        margin-right: -20px;
+        height: 70px;
+    }
+
+        .searchRow .form-group {
+            margin-bottom: 0;
+            margin-top: 8px;
+        }
+
+        .searchRow .control-label {
+            line-height: 36px;
+            font-size: 16px;
+        }
+
+    .marginTop {
+        margin-top: 75px;
+    }
+    .done {
+        background: #91ffaa !important;
+        color:#000;
+    }
+    .undone {
+        background: #ff8989 !important;
+        color: #000;
+    }
+    .incomplete {
+        background: #ffffae !important;
+        color: #000;
+    }
+</style>
+<div class="row searchRow">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <div class="row">
+                @if (canChangeCollege)
+                {
+                    <div class="col-sm-2">
+                        <span class="control-label">نام دانشکده: </span>
+                    </div>
+                    <div class="col-sm-3">
+                        @Html.DropDownList("CollegeList", (SelectList)ViewBag.CollegeList, "انتخاب کنید", new { @class = "form-control" })
+                    </div>
+                }
+                <div class="col-sm-1">
+                    <span class="control-label">ترم: </span>
+                </div>
+                <div class="col-sm-3">
+                    @Html.DropDownList("TermList", (SelectList)ViewBag.TermList, "انتخاب کنید", new { @class = "form-control" })
+                </div>
+                <div class="col-sm-2">
+                    <a href="/" id="btnSelectCollege" class="btn btn-info">انتخاب</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@if (Model == null && ((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]) != null && !(((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsAdministrator || ((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsPowerUser))
+{
+    <div class="alert alert-danger marginTop">شاخص "ارائه برنامه درسی توسط مدیر گروه در موعد مقرر" ایجاد نشده و یا دانشکده ای برای شما تعیین نشده است.</div>
+}
+else if (Model != null)
+{
+    <div class="row">
+        <div class="col-sm-12">
+            @(Html
+                              .Grid(Model)
+                              .Columns(columns =>
+                              {
+                                  columns.Add(model => model.EducationalGroupCode).Titled("کد گروه").SetWidth("10%").Filterable(true).Sortable(true);
+                                  columns.Add(model => model.Name).Titled("عنوان گروه").SetWidth("15%").Filterable(true).Sortable(false);
+                                  columns.Add(model => model.GroupManger.Family).Titled("نام مدیر گروه").RenderValueAs(o => o.GroupManger != null ? (o.GroupManger.Name + " " + o.GroupManger.Family) : "مدیر گروه ندارد").SetWidth("25%").Filterable(true).Sortable(true);
+                                  columns.Add(model => model.Id).Titled("وضعیت").RenderValueAs(o => o.InTimePresentCurriculum).Filterable(true).Sortable(true);
+                              })
+                              .WithMultipleFilters()
+                              .WithPaging(20)
+                              .EmptyText("موردی جهت نمایش یافت نشد.")
+                              .SetLanguage("fa")
+                              .Selectable(false)
+                              .SetRowCssClasses(c=> c.InTimePresentCurriculum == "ثبت شده" ? "done" : c.InTimePresentCurriculum == "ثبت نشده" ? "undone" : "incomplete")
+            )
+        </div>
+    </div>
+}
+
+<script>
+    $(function(){
+        @if (Model != null)
+        {
+        <text>
+        $('#CollegeList').val(@ViewBag.CollegeId);
+        $('#TermList').val(@ViewBag.TermId);
+        </text>
+    }
+        $(document).on('click', '#btnSelectCollege', function (e) {
+            e.preventDefault();
+            @if (canChangeCollege)
+            {
+                <text>
+            if($('#CollegeList').val() !== '' && $('#TermList').val() !== ''){
+                $('.loadingWrapper').show();
+                window.location.href = "/Reports/GroupManagersActivity/?college=" + $('#CollegeList').val() + "&termId=" + $('#TermList').val();
+            }
+            </text>
+            }
+            else
+            {
+                <text>
+            if($('#TermList').val() !== ''){
+                $('.loadingWrapper').show();
+                window.location.href = "/Reports/GroupManagersActivity/?termId=" + $('#TermList').val();
+            }
+                </text>
+            }
+        });
+    });
+</script>

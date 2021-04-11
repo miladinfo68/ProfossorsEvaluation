@@ -1,0 +1,21 @@
+﻿@font-face {
+    font-family: "B Yekan";
+    src: url(../fonts/Yekan-modified.woff?1517899660) format('woff'), url(../fonts/Yekan-modified.ttf?1517899660) format('truetype'), url(../fonts/Yekan-modified.eot?1517899660) format('embedded-opentype');
+}
+
+/*body {
+    background: #f7f7f7;
+    font-family: "B Yekan";
+}*/
+
+.progress .progress-bar {
+    animation-name: animateBar;
+    animation-iteration-count: 1;
+    animation-timing-function: ease-in;
+    animation-duration: .6s;
+}
+
+@keyframes animateBar {
+    0% {transform: translateX(100%);}
+    100% {transform: translateX(0);}
+}

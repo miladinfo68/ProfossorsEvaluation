@@ -1,0 +1,83 @@
+﻿@{Layout = "~/Views/Shared/_Layout.cshtml";}
+@using GridMvc.Html
+@model List<IAUECProfessorsEvaluation.Web.Models.Role>
+<div class="row">
+    <div class="col-sm-12">
+        <a href="/" class="btn btn-success" id="addRole"><i class="fa fa-plus-circle "></i> افزودن نقش جدید</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        @(Html
+    .Grid(Model)
+    .Columns(columns =>
+    {
+        columns.Add(model => model.Name).Titled("عنوان").SetWidth("50%").Filterable(true).Sortable(true);
+        columns.Add(model => model.Users.Count).Titled("تعداد کاربران").SetWidth("25%").Sortable(true);
+        columns.Add(model => model.Id).Titled("عملیات").SetWidth("25%")
+            .Encoded(false).Sanitized(false)
+            .RenderValueAs(o => "<a href=\"/\" class=\"btn btn-info editRole\" data-id=\"" + o.Id + "\"><i class=\"fa fa-pencil\"></i> ویرایش</a>" + (o.Id != 1 ? ("<a href=\"/\" class=\"btn btn-danger deleteRole\" data-id=\"" + o.Id + "\"><i class=\"fa fa-remove\"></i> حذف</a>") : "")).Filterable(false).Sortable(false);
+    })
+    .WithPaging(20)
+    .EmptyText("موردی جهت نمایش یافت نشد.")
+    .WithMultipleFilters()
+        .SetLanguage("fa")
+        )
+    </div>
+    <div id="dialog"></div>
+</div>
+
+<script>
+    $(function () {
+        $('#addRole').click(function (e) {
+            e.preventDefault();
+            var href = "/Pages/ShowRole";
+            $('#dialog').dialog({
+                modal: true,
+                open: function (event, ui) {
+                    $(this).load(href, function (result) { });
+                    return false;
+                },
+                width: 768,
+                maxHeight: 600,
+                minHeight: 100,
+                position: { my: 'center top', at: 'center top' },
+                close: function (event, ui) { $('#dialog').html("") }
+            });
+            return false;
+        });
+
+        $(document).on('click', '.editRole', function (e) {
+            e.preventDefault();
+            var href = "/Pages/ShowRole/" + $(this).data("id");
+            $('#dialog').dialog({
+                modal: true,
+                open: function (event, ui) {
+                    $(this).load(href, function (result) { });
+                    return false;
+                },
+                width: 768,
+                maxHeight: 600,
+                minHeight: 100,
+                position: { my: 'center top', at: 'center top' },
+                close: function (event, ui) { $('#dialog').html("") }
+            });
+            return false;
+        });
+
+        $(document).on('click', '.deleteRole', function (e) {
+            e.preventDefault();
+            if (confirm('آیا از حذف این نقش اطمینان دارید?')) {
+                $.ajax({
+                    url: '/Pages/DeleteRole',
+                    type: 'POST',
+                    data: { id: $(this).data("id") },
+                    success: function (result) {
+                        location.reload();
+                    }
+                });
+            }
+
+        });
+    });
+</script>

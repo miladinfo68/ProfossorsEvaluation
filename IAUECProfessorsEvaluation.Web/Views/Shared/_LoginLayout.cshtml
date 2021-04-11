@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    @RenderSection("metaTags", required: false)
+    <link rel="icon" href="/favicon.ico?v=2">
+    @Styles.Render("~/Content/css/bootstrap.min.css")
+    @Styles.Render("~/Content/css/bootstrap-rtl.min.css")
+    @Styles.Render("~/Content/css/font-awesome.min.css")
+    @Styles.Render("~/Content/css/nprogress.css")
+    @Styles.Render("~/Content/css/bootstrap-progressbar-3.3.4.min.css")
+    @Styles.Render("~/Content/css/green.css")
+    @Styles.Render("~/Content/css/daterangepicker.css")
+    @Styles.Render("~/Content/css/LoginStyle.css")
+    @RenderSection("styles", required: false)
+    <title>سامانه رتبه بندی اساتید، گروه ها و دانشکده ها | @ViewBag.Title</title>
+</head>
+<body>
+    <div class="backgroundImage">
+        <img src="~/Content/images/Azad_University_logo.png" />
+    </div>
+    <div class="header">
+        سامانه رتبه بندی اساتید، گروه ها و دانشکده ها 
+    </div>
+    <div class="container-fluid">
+        @RenderBody()
+    </div>
+</body>
+</html>

@@ -1,0 +1,172 @@
+﻿@{Layout = "~/Views/Shared/_Layout.cshtml";}
+@model List<IAUECProfessorsEvaluation.Web.Models.Professor>
+@using GridMvc.Html
+@using IAUECProfessorsEvaluation.Core.Helper
+
+<style type="text/css">
+    .searchRow {
+        border-bottom: 1px solid #ccc;
+        background: #ddd;
+        margin-left: -20px;
+        margin-right: -20px;
+        height: 70px;
+    }
+
+        .searchRow .form-group {
+            margin-bottom: 0;
+            margin-top: 8px;
+        }
+
+        .searchRow .control-label {
+            line-height: 36px;
+            font-size: 16px;
+        }
+
+    .marginTop {
+        margin-top: 75px;
+    }
+</style>
+
+<div class="row searchRow">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-1">
+                    <span class="control-label">ترم: </span>
+                </div>
+                <div class="col-sm-3">
+                    @Html.DropDownList("TermList", (SelectList)ViewBag.TermList, "انتخاب کنید", new { @class = "form-control" })
+                </div>
+                <div class="col-sm-2">
+                    <a href="/" id="btnSelectTerm" class="btn btn-info">انتخاب</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model != null)
+{
+    <div class="row">
+        <div class="col-sm-12">
+            @(Html
+            .Grid(Model)
+            .Columns(columns =>
+            {
+                columns.Add(model => model.ProfessorCode).Titled("کد استاد").SetWidth("10%").Filterable(true).Sortable(true);
+                columns.Add(model => model.Family).Titled("نام استاد").RenderValueAs(o => o.Name + " " + o.Family).SetWidth("25%").Filterable(true).Sortable(true);
+                columns.Add(model => model.NationalCode).Titled("کد ملی").SetWidth("15%").Filterable(true).Sortable(false);
+                columns.Add(model => model.DeputyComments).Titled("امتیاز فعلی").SetWidth("15%").Filterable(true).Sortable(true).RenderValueAs(o => o.DeputyComments != null ? o.DeputyComments.ToString() : "-");//.RenderValueAs(o => o.ProfessorScores.FirstOrDefault(f => f.Score.Indicator.CountOfType == "p" + (int)IndicatorProfessorName.نظر_مدیر_گروه && f.EducationalGroup.Id == ViewBag.GroupId) != null ? o.ProfessorScores.FirstOrDefault(f => f.Score.Indicator.CountOfType == "p" + (int)IndicatorProfessorName.نظر_مدیر_گروه && f.EducationalGroup.Id == ViewBag.GroupId).CurrentScore.ToString() : "-");
+        columns.Add(model => model.ProfessorScores).Titled("عملیات").SetWidth("20%").Filterable(false)
+                    .Encoded(false).Sanitized(false)
+                    //.RenderValueAs(o => "<div class='starrr' id='star" + o.ProfessorCode + "'></div> <a href=\"/\" title=\"حذف امتیاز\" class=\"resetScore\" data-code=\"" + o.ProfessorCode + "\"><i class=\"fa fa-ban\"></i></a>");
+                    .RenderValueAs(o => "<select class=\"scoreList\"></select><input class=\"currentScore\" type=\"hidden\" value=\"" + (o.DeputyComments != null ? o.DeputyComments.ToString() : "-1") + "\" />");//o.ProfessorScores.FirstOrDefault(f => f.Score.Indicator.CountOfType == "p" + (int)IndicatorProfessorName.نظر_مدیر_گروه && f.EducationalGroup.Id == ViewBag.GroupId) != null ? o.ProfessorScores.FirstOrDefault(f => f.Score.Indicator.CountOfType == "p" + (int)IndicatorProfessorName.نظر_مدیر_گروه && f.EducationalGroup.Id == ViewBag.GroupId).CurrentScore.ToString() : "-1"
+    })
+            .WithMultipleFilters()
+            .WithPaging(20)
+            .EmptyText("موردی جهت نمایش یافت نشد.")
+            .SetLanguage("fa")
+            .Selectable(false)
+            )
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            var scores = [];
+            var points = [];
+            @foreach (var item in ViewBag.Scores) {
+                <text>
+            scores.push('@item.Name');
+            points.push('@item.Point');
+            </text>
+            }
+
+            $('.scoreList').empty().append('<option value="-1">انتخاب کنید</option>');
+            $.each(scores, function(i, v){
+                $('.scoreList').append('<option value="' + points[i] + '">' + v + '</option>');
+            });
+
+            var itemsCount = 0;
+            var modelCount = $('.scoreList').length;
+            $('.scoreList').each(function(){
+                var item = $(this);
+                if(item.parent().find('.currentScore').val() == "-1"){
+                    item.val("-1");
+                    itemsCount++;
+                }
+                else{
+                    var id = $(this).parent().parent().find('td:nth-child(1)').html();
+                    $.ajax({
+                        url: '/Professor/GetCurrentStar',
+                        type: 'POST',
+                        data: { currentRateData: item.parent().find('.currentScore').val(), countOfType: 'p' + @((int)IndicatorProfessorName.نظر_معاون_آموزشی)},
+                        success : function(val){
+                            item.val(val);
+                            itemsCount++;
+                            if(itemsCount === modelCount)
+                                $('.loadingWrapper').hide();
+                            else
+                                $('.loadingWrapper').show();
+                        }
+                    });
+                }
+            });
+
+            $('.scoreList').change(function () {
+                $('.loadingWrapper').show();
+                var selectedValue = $(this).val();
+                var el = $(this);
+                if(selectedValue == "-1"){
+                    $.ajax({
+                        url: '/Professor/DeleteDeputyRate',
+                        type: 'POST',
+                        data: {code: el.parent().parent().find('td:nth-child(1)').html(), termId: @(ViewBag.TermId)},
+                        success: function(result){
+                            el.parent().parent().find('td:nth-child(4)').html("-");
+                            el.parent().find('.currentScore').val("-1");
+                            $('.loadingWrapper').hide();
+                        }
+                    });
+                }
+                else{
+                    var pc = el.parent().parent().find('td:nth-child(1)').html();
+                    $.ajax({
+                        url: '/Professor/AddOrUpdateRate',
+                        type: 'POST',
+                        data: { professorCode: pc, rateIndex: selectedValue, countOfType: 'p' + @((int)IndicatorProfessorName.نظر_معاون_آموزشی), termId: @(ViewBag.TermId)},
+                        success: function (result) {
+                            el.parent().parent().find('td:nth-child(4)').html(result);
+                            el.parent().find('.currentScore').val(result);
+                            $('.loadingWrapper').hide();
+                        }
+                    });
+                }
+            });
+            $('#TermList').val(@ViewBag.TermId);
+        });
+    </script>
+}
+else if (((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]) != null && !(((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsAdministrator || ((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsPowerUser))
+{
+    <div class="alert alert-danger marginTop">
+        <span>خطا در دریافت اطلاعات.</span>
+    </div>
+}
+
+    <script type="text/javascript">
+    $(function () {
+
+        $(document).on('click', '#btnSelectTerm', function (e) {
+            e.preventDefault();
+            if ($('#TermList').val() !== '') {
+                $('.loadingWrapper').show();
+                window.location.href = "/Professor/DeputyRating/?termId=" + $('#TermList').val();
+            }
+        });
+
+        /*------------------------------------------------*/
+        
+        /*------------------------------------------------*/
+        
+    });
+    </script>

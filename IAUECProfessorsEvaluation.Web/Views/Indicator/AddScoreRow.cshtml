@@ -1,0 +1,81 @@
+﻿
+@model IAUECProfessorsEvaluation.Model.Models.Score
+@{
+    var trNum = "tr" + @ViewBag.indexr.ToString();
+    var removeScoreForIndicator = "remove" + @ViewBag.indexr.ToString();
+    var addScoreForIndicator = "add" + @ViewBag.indexr.ToString();
+
+}
+<tr id="@trNum" class="grid-row">
+
+
+
+    <td class="grid-cell">
+        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+    </td>
+    @*<td class="grid-cell">
+            @Html.EditorFor(model => model.UpperBound, new { htmlAttributes = new { @class = "form-control" } })
+        </td>
+        <td class="grid-cell">
+            @Html.EditorFor(model => model.LowerBound, new { htmlAttributes = new { @class = "form-control" } })
+        </td>*@
+    @if (ViewBag.hasLimit)
+    {
+        <td class="grid-cell">
+            @Html.EditorFor(model => model.MinValue, new { htmlAttributes = new { @class = "form-control" } })
+        </td>
+        <td class="grid-cell">
+            @Html.EditorFor(model => model.MaxValue, new { htmlAttributes = new { @class = "form-control" } })
+        </td>
+    }
+    <td class="grid-cell">
+        @Html.EditorFor(model => model.Point, new { htmlAttributes = new { @class = "form-control" } })
+    </td>
+    <td class="grid-cell">
+        <a id="@addScoreForIndicator" class="btn btn-success addScoreForIndicator"><i class="fa fa-save "></i></a>
+        <a id="@removeScoreForIndicator" class="btn btn-danger removeScoreForIndicator" style="display: none"><i class="fa fa-remove "></i></a>
+
+    </td>
+</tr>
+
+<script type="text/javascript">
+    $(function () {
+
+        @*$(document).on('click', "#"+"@addScoreForIndicator", function () {*@
+        $('.addScoreForIndicator').click(function (e) {
+            e.preventDefault();
+            var name = $('#' + '@trNum' + ' #Name').val();
+            var point = $('#' + '@trNum' + ' #Point').val();
+            @if (ViewBag.hasLimit) {
+                <text>
+            var minValue = $('#' + '@trNum' + ' #MinValue').val();
+            var maxValue = $('#' + '@trNum' + ' #MaxValue').val()
+            </text>
+            }
+            else {
+                <text>
+            var minValue = '0';
+            var maxValue = '9999';
+            </text>
+            }
+            @*var lowerBound = $('#'+'@trNum'+' #LowerBound').val();
+            var upperBound = $('#'+'@trNum'+' #UpperBound').val();*@
+            $.post('@Url.Action("AddScoreInSession")',
+                { name: name, maxValue: maxValue, minValue: minValue, point: point, id: '@ViewBag.indexr' }, function () {
+                    $("#" + "@addScoreForIndicator").css("display", "none");
+                    $("#" + "@removeScoreForIndicator").removeAttr("style");
+                    $('#' + '@trNum' + ' .form-control').prop('disabled', true);
+                    $('#scoreCount').val(parseInt($('#scoreCount').val()) + 1);
+                });
+        });
+
+        $(document).on('click', "#" + "@removeScoreForIndicator", function () {
+
+            $.post('@Url.Action("RemoveScoreInSession")',
+                { id: '@ViewBag.indexr' }, function () {
+                    $("#" + "@trNum").css("display", "none");
+                });
+        });
+
+    });
+</script>

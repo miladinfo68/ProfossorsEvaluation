@@ -1,0 +1,191 @@
+﻿@using IAUECProfessorsEvaluation.Data.ReportModel
+@model List<GroupReportModel>
+    @using Kendo.Mvc.UI;
+@using NPOI.SS.Formula.Functions
+    @{
+        ViewBag.Title = "گزارش دانشکده ها";
+        Layout = "~/Views/Shared/_Layout2.cshtml";
+        var pageSize = 20;
+
+    }
+
+
+    <br />
+    <br />
+    <br />
+    <br />
+
+ 
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="row alert alert-info" style="background-color: rgb(42, 63, 84);border-color: rgba(42, 63, 84,.88);">
+            <h4 style="text-align: center">رتبه بندی دانشکده ها</h4>
+
+        </div>
+
+        <div class="row">
+            @(Html.Kendo().Grid<GroupReportModel>(Model)
+                  .Name("Generalresualt")
+                  .Columns(columns =>
+                  {
+                      columns.Bound(x => x.RowNumber).ClientTemplate("#= renderNumber1() #").Filterable(false).Sortable(false).Title("ردیف").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                      columns.Bound(p => p.CollegeCode).Title("کد دانشکده").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                      columns.Bound(p => p.CollegeName).Title("نام دانشکده").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                      columns.Bound(p => p.CollegeScore).Title("امتیاز دانشکده").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                      columns.Bound(p => p.CollegeId).Hidden();
+                      columns.Command(p => p.Custom("مشاهده").Click("showDetails").DataRouteValues(x =>
+                      {
+                          x.Add(o => o.CollegeId);
+                      }).HtmlAttributes(new { style = "text-align: center;" })).Title("جزئیات").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                  })
+                  .HtmlAttributes(new { style = "height: 550px;" })
+                  .Pageable(pageable => pageable
+                      .Input(true)
+                      .Numeric(false)
+                  .Messages(m=>m.AllPages("تمام صفحات").Page("صفحه").Of(" ").Display("").Empty("هیچ مقدار").ItemsPerPage("تعداد نسبت به صفحه")))
+                  .ToolBar(tools => tools.Custom().Text("گزارش با جزئیات").Url(Url.Action("CollegeDetailsPrint","Reports")))
+                  .ToolBar(tools => tools.Custom().Text("گزارش به صورت کلی").Url(Url.Action("CollegeGeneralPrint", "Reports")))
+                  .ToolBar(tools => tools.Custom().Text("بازگشت به گزارش ساز").Url(Url.Action("Index", "Reports")))
+                  //.ToolBar(tools => tools.Excel().Text("  خروجی اکسل  ").IconClass("fff k-icon k-i-excel").HtmlAttributes(new { style = "padding-right: 5px;" }))
+                  //.ToolBar(tools => tools.Custom().Text("خروجی قابل چاپ").IconClass("fff k-icon k-i-pdf").Action("CollegeGeneralPrint", "Reports"))
+                  .Excel(excel => excel
+                      .FileName("GroupGeneralExcelExport.xlsx")
+                      .Filterable(true)
+                      .AllPages(true))
+                  .Sortable()
+                  .Scrollable(scr => scr.Height(430))
+                  .Filterable(filterable => filterable.Operators(
+                      operators => operators.ForString(
+                          str => str.Clear()
+                              .Contains("شامل")
+                              .DoesNotContain("شامل نیست")
+                              .IsEqualTo("برابر")
+                              .IsNotEqualTo("برابر نیست")
+                          )
+                          .ForNumber(num => num.Clear()
+                              .IsEqualTo("برابر")
+                              .IsNotEqualTo("برابر نیست")
+                              .IsGreaterThan("بزرگتر")
+                              .IsGreaterThanOrEqualTo("بزرگتر مساوی")
+                              .IsLessThan("کوچکتر")
+                              .IsLessThanOrEqualTo("کوچکتر مساوی")
+                          )
+
+                      ).Messages(msg => msg.And("و").Clear("پاک").Filter("فیلتر").Or("یا").Info("جستجو:")))
+                  .DataSource(dataSource => dataSource
+                      .Ajax()
+                      .PageSize(pageSize)
+                      .ServerOperation(false)
+                  )
+                  )
+        </div>
+    </div>
+</div>
+
+
+
+@(Html.Kendo().Window().Name("Details")
+    .Title("جزئیات")
+    .Visible(false)
+    .Modal(true)
+    .Draggable(true)
+      .Scrollable(true)
+      .Height(600)
+      
+    .Width(800)
+
+)
+
+<script type="text/x-kendo-template" id="template">
+    <div id="details-container">
+    </div>
+</script>
+
+<script type="text/javascript">
+    var detailsTemplate = kendo.template($("#template").html());
+
+    function showDetails(e) {
+        e.preventDefault();
+
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                    $.ajax({
+                    url: '@Url.Action("CollegeDetails", "Reports")',
+                    type: 'Get',
+                    data: { 'collegeId': dataItem["CollegeId"] }
+                })
+                .done(function (resualt) {
+                var wnd = $("#Details").data("kendoWindow");
+                wnd.content(resualt);
+                wnd.center().open();
+
+                });
+
+
+    }
+</script>
+
+<style type="text/css">
+    #details-container {
+        padding: 10px;
+    }
+
+    .k-window-actions {
+        left: .3em;
+        right: initial !important;
+    }
+
+    #details-container h2 {
+        margin: 0;
+    }
+
+    #details-container em {
+        color: #8c8c8c;
+    }
+
+    #details-container dt {
+        margin: 0;
+        display: inline;
+    }
+</style>
+
+
+<script type="text/javascript">
+    function error_handler(e) {
+        alert("Server error");
+    }
+    var rowNumber = 0;
+    var rowNumber1 = 0;
+
+    function resetRowNumber() {
+        rowNumber = 0;
+    }
+    function resetRowNumber1() {
+        rowNumber1 = 0;
+    }
+    function renderNumber() {
+        return ++rowNumber;
+    }
+    function renderNumber1() {
+        return ++rowNumber1;
+    }
+    function onSorting(arg) {
+        resetRowNumber();
+    }
+    function onSorting1(arg) {
+        resetRowNumber1();
+    }
+    function onFiltering(arg) {
+        resetRowNumber();
+    }
+    function onFiltering1(arg) {
+        resetRowNumber1();
+    }
+    function onPaging(arg) {
+        rowNumber = (arg.page - 1) * @pageSize;
+    }
+    function onPaging1(arg) {
+        rowNumber1 = (arg.page - 1) * @pageSize;
+    }
+    </script>

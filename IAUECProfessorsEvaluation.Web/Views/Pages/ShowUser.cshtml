@@ -1,0 +1,225 @@
+﻿@{Layout = "~/Views/Shared/_BlankLayout.cshtml";}
+@model IAUECProfessorsEvaluation.Web.Models.User
+
+<style>
+    .row {
+        margin-bottom: 15px;
+    }
+
+    .textCenter {
+        text-align: center;
+    }
+
+    .errorWrapper {
+        display: none;
+    }
+</style>
+
+<div class="errorWrapper alert alert-danger">
+    <ul></ul>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <span>نام</span>
+    </div>
+    <div class="col-sm-8">
+        @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control firstName" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <span>نام خانوادگی</span>
+    </div>
+    <div class="col-sm-8">
+        @Html.TextBoxFor(m => m.LastName, new { @class = "form-control lastName" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <span>نام کاربری</span>
+    </div>
+    <div class="col-sm-8">
+        @Html.TextBoxFor(m => m.Username, new { @class = "form-control username" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <span>کلمه عبور</span>
+    </div>
+    <div class="col-sm-8">
+        @Html.Password("Password", null, new { @class = "form-control password" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <span>تکرار کلمه عبور</span>
+    </div>
+    <div class="col-sm-8">
+        @Html.Password("PasswordRepeat", null, new { @class = "form-control passwordRepeat" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <span>نام کاربری سامانه خدمات</span>
+    </div>
+    <div class="col-sm-8">
+        @Html.TextBoxFor(m => m.ServiceUsername, new { @class = "form-control serviceUsername" })
+    </div>
+</div>
+@if (Model.ID != 1)
+{
+    <div class="row">
+        <div class="col-sm-4">
+            <span>کاربر مدیریت سامانه</span>
+        </div>
+        <div class="col-sm-8">
+            @Html.CheckBoxFor(m => m.IsAdministrator, new { @class = "isAdministrator" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+            <span>کاربر ارشد</span>
+        </div>
+        <div class="col-sm-8">
+            @Html.CheckBoxFor(m => m.IsPowerUser, new { @class = "isPowerUser" })
+        </div>
+    </div>
+<div class="row">
+    <div class="col-sm-4">
+        <span>عنوان دانشکده</span>
+    </div>
+    <div class="col-sm-8">
+        @Html.DropDownList("CollegeList", (SelectList)ViewBag.CollegeList, "انتخاب کنید", new { @class = "form-control" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <span>عنوان گروه</span>
+    </div>
+    <div class="col-sm-8">
+        @Html.DropDownList("GroupList", (SelectList)ViewBag.GroupList, "انتخاب کنید", new { @class = "form-control" })
+    </div>
+</div>
+}
+<div class="row">
+    <div class="col-sm-2 textCenter">
+        <a class="btn btn-success" id="addOrUpdate">ثبت</a>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('.errorWrapper').hide();
+        $('#CollegeList, #GroupList').prop('disabled', $('.isAdministrator').is(':checked'));
+        var collegeId = 0;
+        var groupId = 0;
+        @if(Model.College != null)
+        {
+            <text>
+        collegeId = @Model.College.Id;
+        </text>
+        }
+        @if(Model.EducationalGroupCode != null)
+        {
+            <text>
+        groupId = @Model.EducationalGroupCode;
+        </text>
+        }
+        if(@Model.ID > 0)
+        {
+            if(collegeId > 0)
+            {
+                $('#CollegeList').val(collegeId);
+                fillGroupList($('#CollegeList'), true);
+                //if(groupId > 0)
+                //    setTimeout(function(){ $('#GroupList').val(groupId);}, 200);
+            }
+        }
+
+        $('.isAdministrator').change(function(){
+            $('#CollegeList, #GroupList').prop('disabled', $(this).is(':checked'));
+        })
+        $('#addOrUpdate').click(function (e) {
+            e.preventDefault();
+            var valid = true;
+            var message = '';
+            if($('#Password').val() != $('#PasswordRepeat').val() && ($('#Password').val() !== '' || $('#PasswordRepeat').val() !== '')){
+                valid = false;
+                message += '<li>کلمه عبور و تکرار کلمه عبور یکسان نیستند.</li>';
+            }
+            if($('#Username').val() === ''){
+                valid = false;
+                message += '<li>نام کاربری را وارد نمائید.</li>';
+            }
+            if($('#Password').val() === '' && $('#PasswordRepeat').val() === '' && @Model.ID == 0){
+                valid = false;
+                message += '<li>کلمه عبور را وارد نمائید.</li>';
+            }
+            if (valid) {
+                $('.loadingWrapper').show();
+                $.ajax({
+                    url: '/Pages/AddOrUpdateUser',
+                    type: 'POST',
+                    data: {
+                        id: '@Model.ID',
+                        username: $('.username').val(),
+                        firstName: $('#FirstName').val(),
+                        lastName: $('#LastName').val(),
+                        college: $('#CollegeList').val(),
+                        group: $('#GroupList').val(),
+                        password: $('#Password').val(),
+                        @if (Model.ID != 1) {
+                            <text>
+                        isAdministrator: $('.isAdministrator').is(':checked'),
+                        </text>
+                            }
+                        else
+                        {
+                            <text>
+                        isAdministrator: true,
+                        </text>
+                        }
+                    isPowerUser: $('.isPowerUser').is(':checked'),
+                        serviceUsername: $('#ServiceUsername').val(),
+                    },
+                    success: function (result) {
+                        location.reload();
+                    }
+                });
+            }
+            else{
+                $('.errorWrapper ul').html(message);
+                $('.errorWrapper').show();
+            }
+        });
+
+        $(document).on('change', '#CollegeList', function () {
+            fillGroupList($(this));
+        });
+
+        function fillGroupList(e, bindGroup) {
+            $('#GroupList').find('option').remove().append('<option value="">انتخاب کنید</option>');
+            $('#GroupList').append('<option value="">انتخاب کنید</option>');
+            if (e.val() != '') {
+                $('.loadingWrapper').show();
+                $.ajax({
+                    url: '/Pages/GetGroupsOfCollege',
+                    contentType: "application/json",
+                    dataType: "json",
+                    type: 'POST',
+                    data: "{'id':'" + e.val() + "'}",
+                    success: function (json) {
+                        var options = [];
+                        for (var i in json) {
+                            options.push('<option value="' + json[i].Code + '">' + json[i].Name + '</option>');
+                        }
+                        $('#GroupList').append(options.join(''));
+                        if (bindGroup && groupId > 0)
+                            $('#GroupList').val(groupId);
+                        $('.loadingWrapper').hide();
+                    }
+                });
+            }
+        }
+    });
+</script>

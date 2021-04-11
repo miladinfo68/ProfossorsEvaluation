@@ -1,0 +1,117 @@
+﻿@{Layout = "~/Views/Shared/_BlankLayout.cshtml";}
+@model IAUECProfessorsEvaluation.Web.Models.Role
+
+<style>
+    .userList {
+        width: 79%;
+        display: inline-block;
+    }
+
+    .userBox {
+        min-height: 150px;
+        border: 1px solid #ccc;
+        box-shadow: -2px 2px 2px #ddd inset;
+        background: #eee;
+    }
+
+    .userTitle {
+        border-right: 2px solid #ccc;
+        border-bottom: 1px solid #eee;
+        width: 150px;
+        padding: 10px;
+        color: #444;
+    }
+
+    .userItem {
+        display: inline-block;
+        margin: 5px 10px;
+        padding: 2px 5px;
+        border: 1px solid #aaa;
+        border-radius: 3px;
+        background: #fefefe;
+    }
+</style>
+
+<div class="row">
+    <div class="col-sm-3">
+        <span>عنوان نقش</span>
+    </div>
+    <div class="col-sm-6">
+        @Html.TextBoxFor(m=> m.Name, new { @class = "form-control" })
+    </div>
+    <div class="col-sm-3">
+        <a href="/" class="btn btn-success" id="addOrUpdate">ثبت</a>
+    </div>
+</div>
+@if (Model.Id > 0)
+{
+    <div class="row">
+        <div class="col-sm-12">
+            <hr />
+            <h5 class="userTitle">کاربران</h5>
+        </div>
+        <div class="col-sm-12">
+            @Html.DropDownList("UserList", (SelectList)ViewBag.UserList, "انتخاب کنید", new { @class = "form-control userList" })
+            <a href="/" class="btn btn-primary" id="addUserRole">افزودن کاربر به نقش</a>
+        </div>
+        <div class="col-sm-12">
+            <div class="userBox">
+                @foreach (var user in Model.Users)
+                {
+                    <div class="userItem">
+                        <span>@user.Username</span>
+                        <a href="/" class="deleteUserRole" data-id="@user.ID"> <i class="fa fa-remove"></i></a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    $(function () {
+        $(document).on('click', '#addOrUpdate', function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: '/Pages/AddOrUpdateRole',
+                type: 'POST',
+                data: { id: '@Model.Id', name: $('#Name').val() },
+                success: function (result) {
+                    location.reload();
+                }
+            });
+        });
+
+        $(document).on('click', '#addUserRole', function (e) {
+            e.preventDefault();
+            if ($('#UserList').val() !== '') {
+                $.ajax({
+                    url: '/Pages/AddUserRole',
+                    type: 'POST',
+                    data: { roleId: '@Model.Id', userId: $('#UserList').val() },
+                    success: function (result) {
+                        if(result == 1)
+                            $('.userBox').append('<div class="userItem"><span>' + $('#UserList option:selected').text() +
+                                '</span><a href="/" class="deleteUserRole" data-id="' + $('#UserList').val() + '"> <i class="fa fa-remove"></i></a></div>');
+                    }
+                });
+            }
+        });
+
+        $(document).on('click', '.deleteUserRole', function (e) {
+            e.preventDefault();
+            var btn = $(this);
+            if (confirm('آیا از حذف این کاربر اطمینان دارید?')) {
+                $.ajax({
+                    url: '/Pages/DeleteUserRole',
+                    type: 'POST',
+                    data: { roleId: '@Model.Id', userId: btn.data('id') },
+                    success: function (result) {
+                        if(result == 1)
+                            btn.parent().remove();
+                    }
+                });
+            }
+        });
+    });
+</script>

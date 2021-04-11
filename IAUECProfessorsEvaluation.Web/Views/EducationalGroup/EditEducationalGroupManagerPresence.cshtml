@@ -1,0 +1,187 @@
+﻿@{Layout = "~/Views/Shared/_BlankLayout.cshtml";}
+@model IAUECProfessorsEvaluation.Model.Models.EducationalGroup
+
+<style>
+    .educationalClassInfo .row {
+        margin-bottom: 15px;
+    }
+</style>
+
+
+<div class="educationalClassInfo">
+    <div class="row">
+        <div class="col-sm-2">
+            کد گروه:
+        </div>
+        <div class="col-sm-3">
+            @Model.EducationalGroupCode
+        </div>
+        <div class="col-sm-4">
+            میانگین حضور آنلاین مدیر گروه:
+        </div>
+        <div class="col-sm-3">
+            @if (ViewBag.OnlineScoreList != null)
+            {
+                @Html.DropDownList("onlineScoreList", (SelectList)ViewBag.OnlineScoreList, "انتخاب کنید", new { @class = "form-control" })
+            }
+            else
+            {
+                <span style="font-size: 12px; color: #999;">امتیاز شاخص تعیین نشده است.</span>
+            }
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-2">
+            عنوان گروه:
+        </div>
+        <div class="col-sm-3">
+            @Model.Name
+        </div>
+        <div class="col-sm-4">
+            میانگین حضور فیزیکی مدیر گروه:
+        </div>
+        <div class="col-sm-3">
+            @if (ViewBag.PhysicalScoreList != null)
+            {
+                @Html.DropDownList("physicalScoreList", (SelectList)ViewBag.PhysicalScoreList, "انتخاب کنید", new { @class = "form-control" })
+            }
+            else
+            {
+                <span style="font-size: 12px; color: #999;">امتیاز شاخص تعیین نشده است.</span>
+            }
+        </div>
+
+
+    </div>
+    <div class="row">
+        <div class="col-sm-2">
+            نام مدیر گروه:
+        </div>
+        <div class="col-sm-3">
+            @Model.GroupManger.Name @Model.GroupManger.Family
+        </div>
+        @*<div class="col-sm-4">
+                میانگین زمان سایر جلسات:
+            </div>
+            <div class="col-sm-3">
+                @if (ViewBag.OtherScoreList != null)
+                {
+                    @Html.DropDownList("otherScoreList", (SelectList)ViewBag.OtherScoreList, "انتخاب کنید", new { @class = "form-control" })
+                }
+                else
+                {
+                    <span style="font-size: 12px; color: #999;">امتیاز شاخص تعیین نشده است.</span>
+                }
+            </div>*@
+        <div class="col-sm-4">
+            تعطیلات رسمی کلاس آنلاین مدیر گروه:
+        </div>
+        <div class="col-sm-3">
+            @if (ViewBag.OnlineHolidayScoreList != null)
+            {
+                @Html.DropDownList("onlineHolidayScoreList", (SelectList)ViewBag.OnlineHolidayScoreList, "انتخاب کنید", new { @class = "form-control" })
+            }
+            else
+            {
+                <span style="font-size: 12px; color: #999;">امتیاز شاخص تعیین نشده است.</span>
+            }
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-5"></div>
+        <div class="col-sm-4">
+            تعطیلات رسمی حضور فیزیکی مدیر گروه:
+        </div>
+        <div class="col-sm-3">
+            @if (ViewBag.OfflineHolidayScoreList != null)
+            {
+                @Html.DropDownList("offlineHolidayScoreList", (SelectList)ViewBag.OfflineHolidayScoreList, "انتخاب کنید", new { @class = "form-control" })
+            }
+            else
+            {
+                <span style="font-size: 12px; color: #999;">امتیاز شاخص تعیین نشده است.</span>
+            }
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-5"></div>
+        <div class="col-sm-4">
+            جلسات شورای آموزشی - پژوهشی:
+        </div>
+        <div class="col-sm-3">
+            @if (ViewBag.EducationalAndResearchCouncilScoreList != null)
+            {
+                @Html.DropDownList("educationalAndResearchCouncilScoreList", (SelectList)ViewBag.EducationalAndResearchCouncilScoreList, "انتخاب کنید", new { @class = "form-control" })
+            }
+            else
+            {
+                <span style="font-size: 12px; color: #999;">امتیاز شاخص تعیین نشده است.</span>
+            }
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 textCenter">
+            <a href="/" class="btn btn-success" id="btnSave">ذخیره</a>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(function () {
+        @if(ViewBag.OnlineScoreId != null)
+    {
+        <text>
+        $('#onlineScoreList').val(@ViewBag.OnlineScoreId);
+        </text>
+    }
+        @if(ViewBag.PhysicalScoreId != null)
+        {
+            <text>
+        $('#physicalScoreList').val(@ViewBag.PhysicalScoreId);
+        </text>
+        }
+
+        @if(ViewBag.OnlineHolidayScoreId != null)
+        {
+            <text>
+        $('#onlineHolidayScoreList').val(@ViewBag.OnlineHolidayScoreId);
+        </text>
+        }
+        @if(ViewBag.OfflineHolidayScoreId != null)
+        {
+            <text>
+        $('#offlineHolidayScoreList').val(@ViewBag.OfflineHolidayScoreId);
+        </text>
+        }
+        @if(ViewBag.EducationAndResearchCouncilId != null)
+        {
+            <text>
+        $('#educationalAndResearchCouncilScoreList').val(@ViewBag.EducationAndResearchCouncilId);
+        </text>
+        }
+
+        $(document).on('click', '#btnSave', function (e) {
+            e.preventDefault();
+            $('.loadingWrapper').show();
+            $.ajax({
+                url: '/EducationalGroup/UpdateEducationalGroupManagerPresence',
+                type: 'POST',
+                data: {
+                    groupData: @Model.EducationalGroupCode,
+                    onlineScore: $('#onlineScoreList').val(),
+                    physicalScore: $('#physicalScoreList').val(),
+                    onlineHolidayScore: $('#onlineHolidayScoreList').val(),
+                    offlineHolidayScore: $('#offlineHolidayScoreList').val(),
+                    educationalAndResearchCouncilScore: $('#educationalAndResearchCouncilScoreList').val(),
+                    //otherScore: $('#otherScoreList').val(),
+                    termId: @ViewBag.TermId
+                },
+                success: function (result) {
+                    //$('.ui-dialog-content').dialog('close');
+                    location.reload();
+                }
+            });
+        });
+    });
+</script>

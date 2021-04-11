@@ -1,0 +1,157 @@
+﻿
+@using IAUECProfessorsEvaluation.Web.Models.Utility
+@model List<IAUECProfessorsEvaluation.Data.ReportModel.ProfessorDetialReportModel>
+
+<style>
+    .title {
+        padding: 0px 10px;
+    }
+
+        .title > div {
+            border-bottom: 2px solid #ccc;
+            font-size: 1em;
+            font-weight: bold;
+            line-height: 2em;
+            padding-right: 10px;
+        }
+
+    .professorInfo {
+        margin-bottom: 15px;
+        border-bottom: 1px solid #ccc;
+        line-height: 30px;
+    }
+
+    .topProfessorImage {
+        /*position: absolute;
+        left: 10px;
+        top: 0;
+        bottom: 0;
+        margin: auto;*/
+        height: 70px;
+        overflow: hidden;
+        width: 70px;
+        max-width: 70px;
+        border: 2px solid #ccc;
+        border-radius: 50%;
+        text-align: center;
+        white-space: nowrap;
+        display: inline-block;
+        margin-top: 10px;
+        float: left;
+    }
+
+        .topProfessorImage img {
+            width: 100%;
+            position: relative;
+            top: 5px;
+            /*left: 0;
+            right: 0;
+            bottom: 0;*/
+            margin: auto;
+        }
+
+    .avgScore {
+        font-size: 14px;
+        font-weight: bold;
+        text-align: center;
+        border-top: 1px solid #ddd;
+    }
+
+    .k-widget .container * {
+        box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+    }
+
+    .progress {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="container" style="width: 98%">
+    <div class="row">
+        <div class="title col-xs-12">
+            <div>مشخصات استاد</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-8">
+            <div class="row">
+                <div class="col-xs-3">نام و نام خانوادگی:</div>
+                <div class="col-xs-5"> @Model.FirstOrDefault().FullName</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-3">کد استاد:</div>
+                <div class="col-xs-5"> @Model.FirstOrDefault().ProfessorCode</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-3">کد ملی:</div>
+                <div class="col-xs-5"> @Model.FirstOrDefault().NationalCode</div>
+            </div>
+
+        </div>
+        <div class="col-xs-4">
+            <div class="topProfessorImage">
+                <img src="~/Content/images/person.png" />
+            </div>
+
+        </div>
+
+    </div>
+    <hr />
+    <div class="row">
+        <div class="title col-xs-4">
+            <div>عنوان شاخص</div>
+        </div>
+        <div class="title col-xs-8">
+            <div>میانگین امتیاز</div>
+        </div>
+    </div>
+    @foreach (var item in Model.OrderBy(x => x.IndicatorName))
+    {
+        if (!string.IsNullOrEmpty(item.AvgScore.ToString()))
+        {
+            <div class="row">
+                <div class="col-xs-4">
+                    <div>@item.IndicatorName</div>
+                    <div><span>میزان اهمیت: </span><span>@item.RationName (x @item.RationValue)</span></div>
+                </div>
+                <div class="col-xs-8">
+
+                    <div>@((item.AvgScore / item.RationValue)?.GetScoreName(item.IndicatorId, item.ProfessorCode, ((int)ViewBag.TermId)))</div>
+                    <div class="progress" style="border-radius: 5px;">
+                        <div class="progress-bar @((item.AvgScore / item.RationValue)?.GetCssClassForProgressBar())" role="progressbar" aria-valuenow="@(item.AvgScore / item.RationValue)" aria-valuemin="0" aria-valuemax="100" style="width: @(item.AvgScore / item.RationValue)%;">
+                            <span style="line-height: 20px;">@(item.AvgScore / item.RationValue)</span>
+                        </div>
+                    </div>
+                    <div class="avgScore">@item.AvgScore</div>
+
+
+
+                </div>
+
+            </div>
+        }
+        else
+        {
+            <div class="row" style="display: block;background-color: antiquewhite">
+                <div class="col-xs-4">
+                    <div>@item.IndicatorName</div>
+                    <div><span>میزان اهمیت: </span><span>@item.RationName (x @item.RationValue)</span></div>
+                </div>
+                <div class="col-xs-8">
+
+                    <div class="alert alert-warning" style="display: block; padding: initial; margin: initial; border-color: #2a3f54; background-color: #2a3f54;text-align: center">
+                        <h5>موجود نمی باشد</h5>
+                    </div>
+
+                </div>
+
+            </div>
+        }
+        <hr class="col-xs-12" />
+    }
+
+
+</div>
+

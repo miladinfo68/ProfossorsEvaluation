@@ -1,0 +1,152 @@
+﻿@model IAUECProfessorsEvaluation.Model.Models.Score
+@{
+    var eScoreForIndicator = "edit" + Model.Id.ToString();
+    var rScoreForIndicator = "remove" + Model.Id.ToString();
+}
+
+<tr id="editTr" class="grid-row">
+
+
+    <td class="grid-cell">
+        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+    </td>
+    @*<td class="grid-cell">
+        @Html.EditorFor(model => model.UpperBound, new { htmlAttributes = new { @class = "form-control" } })
+    </td>
+    <td class="grid-cell">
+        @Html.EditorFor(model => model.LowerBound, new { htmlAttributes = new { @class = "form-control" } })
+    </td>*@
+@if (ViewBag.hasLimit)
+{
+    <td class="grid-cell">
+        @Html.EditorFor(model => model.MinValue, new { htmlAttributes = new { @class = "form-control" } })
+    </td>
+    <td class="grid-cell">
+        @Html.EditorFor(model => model.MaxValue, new { htmlAttributes = new { @class = "form-control" } })
+    </td>
+    }
+    <td class="grid-cell">
+        @Html.EditorFor(model => model.Point, new { htmlAttributes = new { @class = "form-control" } })
+    </td>
+    <td class="grid-cell">
+        <a id="@eScoreForIndicator" class="btn btn-success" title="ذخیره"><i class="fa fa-save "></i></a>
+        <a id="@rScoreForIndicator" class="btn btn-warning" title="انصراف"><i class="fa fa-remove "></i></a>
+    </td>
+</tr>
+
+<script type="text/javascript">
+    $(function() {
+
+        var rowIndex = 1;
+        $('#' + '@eScoreForIndicator').click(function(e) {
+            e.preventDefault();
+            var name = $('#editTr' + ' #Name').val();
+            var point = $('#editTr' + ' #Point').val();
+            var minValue = $('#editTr' + ' #MinValue').val();
+            var maxValue = $('#editTr' + ' #MaxValue').val();
+            //var lowerBound = $('#editTr' + ' #LowerBound').val();
+            //var upperBound = $('#editTr' + ' #UpperBound').val();
+            $.ajax({
+                url: '/Indicator/EditScoreForIndicator1',
+                type: 'Post',
+                data: {
+                    name: name,
+                    maxValue: maxValue,
+                    minValue: minValue,
+                    //upperBound: upperBound,
+                    //lowerBound: lowerBound,
+                    point: point,
+                    id: '@Model.Id' },
+
+                success: function (resualt) {
+                    var href = "/Indicator/AddOrUpdateProfessorIndicator/" + @Model.Indicator.Id;
+                    $('#dialog').dialog('destroy');
+                    $('#dialog').dialog({
+                        open: function (event, ui) {
+                            $(this).load(href, function (result) {
+                                $('#AddOrUpdateProfessorIndicatorForm').submit(function () {
+
+                                    $.ajax({
+                                        url: this.action,
+                                        type: this.method,
+                                        data: $(this).serialize(),
+                                        success: function (json) {
+                                            //  $('#dialog').dialog('close');
+                                            window.location.href = window.location.href;
+                                        }
+                                    });
+                                    return false;
+                                });
+                            });
+                        },
+                        modal: true,
+                        width: 768,
+                        maxHeight: 600,
+                        minHeight: 600,
+                        position: { my: 'center top', at: 'center top' },
+                        close: function (event, ui) {
+                            $('#dialog').html("")
+                        }
+                    });
+                    @*$('#dialog').dialog({
+                        modal: true,
+                        open: function (event, ui) {
+
+                            $(this).load('/Indicator/AddOrUpdateProfessorIndicator',@*('@Url.Action("AddOrUpdateProfessorIndicator",new{id =Model.Indicator.Id})',*
+                                function(result) {
+                                });
+                            return false;
+
+                        },
+                        width: 768,
+                        maxHeight: 600,
+                        minHeight: 300,
+                        position: { my: 'center top', at: 'center top' },
+                        close: function (event, ui) {
+
+                            $('#dialog').html('');
+                        }
+                    });*@
+                }
+            });
+        });
+
+        $('#' + '@rScoreForIndicator').click(function(e) {
+            e.preventDefault();
+            var editRow = $(this).closest('#editTr');
+            editRow.prev().find('a').show();
+            editRow.remove();
+            @*$.ajax({
+                url: '/Indicator/DeleteScoreFromIndicator',
+                type: 'Post',
+                data: {
+                    id: '@Model.Id' },
+
+                success: function (resualt) {
+
+                    $('#dialog').dialog({
+                        modal: true,
+                        open: function (event, ui) {
+
+                            $(this).load('@Url.Action("AddOrUpdateProfessorIndicator",new{id =Model.Indicator.Id})',
+                                function(result) {
+                                });
+
+
+                        },
+                        width: 768,
+                        height: 600,
+                        close: function (event, ui) {
+
+                            $('#dialog').html('');
+                        }
+                    });
+                }
+            });*@
+        });
+
+
+
+
+    });
+</script>

@@ -1,0 +1,125 @@
+﻿@{Layout = "~/Views/Shared/_Layout.cshtml";}
+@model List<IAUECProfessorsEvaluation.Web.Models.ViewModel.SystemMessageViewModel>
+
+@*@{Html.RenderPartial("_ProfessorInUniversityWidget");}
+@{Html.RenderPartial("_EducationalGroupInUniversityWidget");}
+@{Html.RenderPartial("_CollegeInUniversityWidget");}*@
+
+
+@section styles
+    {
+    <style>
+        .widgetBox {
+            border: 1px solid #ccc;
+        }
+
+        .widgetTitle {
+            font-size: 18px;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 2px;
+            line-height: 42px;
+            border-right: 1px solid #ccc;
+            padding-right: 15px;
+            color: #333;
+        }
+
+        .topRanks {
+            background: #ededed;
+            margin: 10px 0;
+            min-height: 75px;
+            line-height: 75px;
+            font-size: 18px;
+            border: 1px solid #ddd;
+        }
+
+            .topRanks .col-sm-2 {
+                font-size: 14px;
+            }
+
+                .topRanks .col-sm-2::after {
+                    content: "";
+                    height: 50%;
+                    display: inline-block;
+                    border-left: 1px solid #bbb;
+                    position: absolute;
+                    left: 0;
+                    top: 25%;
+                }
+
+        .canvasDoughnut {
+            margin: 15px auto !important;
+        }
+
+        .titleInfoWrapper {
+            margin-top: 75px;
+        }
+    </style>
+}
+@section topScripts
+{
+    <script type="text/javascript" src="~/Content/js/Chart.min.js"></script>
+}
+<script>
+    $(function () {
+          $.ajax({
+            type: "POST",
+            url: "/StudentEvaluation/IsQuestionExist",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (res) {
+                if (res) {
+                    IsUserevaluated();
+                }
+            },
+            Error: function () {
+                console.log("error")
+            }
+        });
+    });
+    function IsUserevaluated() {
+         $.ajax({
+            type: "POST",
+            url: "/StudentEvaluation/IsUserevaluated",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (res) {
+                if (!res) {
+                    GetQuestions();
+                }
+            },
+            Error: function () {
+                console.log("error")
+            }
+        });
+    }
+
+    function GetQuestions() {
+        $.ajax({
+            type: "POST",
+            url: "/StudentEvaluation/GetQuestions",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (html) {
+                
+            },
+            Error: function () {
+                console.log("error")
+            }
+        });
+    }
+</script>
+
+@if(Model.Count() > 0)
+{
+    foreach(var item in Model.GroupBy(g=> g.MessageType))
+    {
+        <div class="alert alert-@item.Key">
+            <ul>
+                @foreach (var message in item)
+                {
+                    <li>@message.MessageBody</li>
+                }
+            </ul>
+        </div>
+    }
+}

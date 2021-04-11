@@ -1,0 +1,172 @@
+﻿@{Layout = "~/Views/Shared/_Layout.cshtml";}
+@model List<IAUECProfessorsEvaluation.Model.Models.EducationalGroup>
+@using GridMvc.Html
+@using IAUECProfessorsEvaluation.Model.Models
+@using IAUECProfessorsEvaluation.Core.Helper
+
+@{
+    var canChangeCollege = Session["UserInfo"] != null
+        && (((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsAdministrator || ((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsPowerUser);
+ }
+
+<style>
+    .searchRow {
+        border-bottom: 1px solid #ccc;
+        background: #ddd;
+        margin-left: -20px;
+        margin-right: -20px;
+        height: 70px;
+    }
+
+        .searchRow .form-group {
+            margin-bottom: 0;
+            margin-top: 8px;
+        }
+
+        .searchRow .control-label {
+            line-height: 36px;
+            font-size: 16px;
+        }
+    .marginTop {
+        margin-top: 75px;
+    }
+</style>
+
+
+    <div class="row searchRow">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <div class="row">
+@if (canChangeCollege)
+{
+                    <div class="col-sm-2">
+                        <span class="control-label">نام دانشکده: </span>
+                    </div>
+                    <div class="col-sm-3">
+                        @Html.DropDownList("CollegeList", (SelectList)ViewBag.CollegeList, "انتخاب کنید", new { @class = "form-control" })
+                    </div>
+                    }
+                    <div class="col-sm-1">
+                        <span class="control-label">ترم: </span>
+                    </div>
+                    <div class="col-sm-3">
+                        @Html.DropDownList("TermList", (SelectList)ViewBag.TermList, "انتخاب کنید", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-2">
+                        <a href="/" id="btnSelectCollege" class="btn btn-info">انتخاب</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+@if (Model != null)
+{
+    <div class="row">
+        <div class="col-sm-12">
+            @Html.Grid(Model).Columns(columns =>
+       {
+           columns.Add(model => model.EducationalGroupCode).Titled("کد گروه").SetWidth("10%").Filterable(true).Sortable(true);
+           columns.Add(model => model.Name).Titled("عنوان گروه").SetWidth("10%").Filterable(true).Sortable(true);
+           columns.Add(model => model.GroupManger).RenderValueAs(o => o.GroupManger != null ? o.GroupManger.Name + " " + o.GroupManger.Family : "").Titled("نام مدیر گروه").SetWidth("10%").Filterable(true).Sortable(true);
+
+           columns.Add(model => model.OnlinePresenceTime)
+            .RenderValueAs(o => ((List<Score>)ViewBag.onlineScores).FirstOrDefault(f=> f.Point == o.OnlinePresenceTime)?.Name)//(w => w.MaxValue > o.OnlinePresenceTime && w.MinValue <= o.OnlinePresenceTime) != null ? ((List<Score>)ViewBag.onlineScores).FirstOrDefault(w => w.MaxValue > o.OnlinePresenceTime && w.MinValue <= o.OnlinePresenceTime).Name : "")
+            .Titled("میانگین حضور آنلاین مدیر گروه").SetWidth("10%").Filterable(true).Sortable(true);
+           columns.Add(model => model.PhysicalPresenceTime)
+            .RenderValueAs(o => ((List<Score>)ViewBag.physicalScores).FirstOrDefault(f=> f.Point == o.PhysicalPresenceTime)?.Name)//(w => w.MaxValue > o.PhysicalPresenceTime && w.MinValue <= o.PhysicalPresenceTime) != null ? ((List<Score>)ViewBag.physicalScores).FirstOrDefault(w => w.MaxValue > o.PhysicalPresenceTime && w.MinValue <= o.PhysicalPresenceTime).Name : "")
+            .Titled("میانگین حضور فیزیکی مدیر گروه").SetWidth("10%").Filterable(true).Sortable(true);
+           // columns.Add(model => model.OtherPresenceTime)
+           //  .RenderValueAs(o => ((List<Score>)ViewBag.otherScores).FirstOrDefault(f => f.Point == o.OtherPresenceTime)?.Name)
+           //  .Titled("میانگین زمان سایر جلسات (تعطیلات رسمی، مشکلات فنی، ...)").SetWidth("20%").Filterable(true).Sortable(true);
+
+           columns.Add(model => model.OnlineHolidays)
+            .RenderValueAs(o => ((List<Score>)ViewBag.OnlineHolidays).FirstOrDefault(f => f.Point == o.OnlineHolidays)?.Name)
+            .Titled("تعطیلات رسمی کلاس آنلاین").SetWidth("10%").Filterable(true).Sortable(true);
+           columns.Add(model => model.OfflineHolidays)
+            .RenderValueAs(o => ((List<Score>)ViewBag.OfflineHolidays).FirstOrDefault(f => f.Point == o.OfflineHolidays)?.Name)
+            .Titled("تعطیلات رسمی حضور فیزیکی").SetWidth("10%").Filterable(true).Sortable(true);
+           columns.Add(model => model.EducationalAndResearchCouncil)
+            .RenderValueAs(o => ((List<Score>)ViewBag.EducationalAndResearchCouncil).FirstOrDefault(f => f.Point == o.EducationalAndResearchCouncil)?.Name)
+            .Titled("جلسات شورای آموزشی - پژوهشی").SetWidth("10%").Filterable(true).Sortable(true);
+
+
+           columns.Add(model => model.Id).Titled("عملیات").SetWidth("10%").Filterable(false)
+           .Encoded(false).Sanitized(false)
+           .RenderValueAs(o => "<a id=\"EditGroupDetails\" href=\"/\" class=\"btn btn-info\" data-id=\"" + o.EducationalGroupCode + "\" " + (o.GroupManger == null || o.GroupManger.Id == 0 ? "disabled=\"disabled\"" : "") + "><i class=\"fa fa-info\"></i> ویرایش</a>");
+       }).WithMultipleFilters().WithPaging(20).EmptyText("موردی جهت نمایش یافت نشد.").SetLanguage("fa")
+        </div>
+        <div id="dialog"></div>
+    </div>
+}
+else if(((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]) != null && !(((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsAdministrator || ((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsPowerUser))
+{
+    <div class="alert alert-danger marginTop">
+        <span>دانشکده ای برای شما تعیین نشده است.</span>
+    </div>
+}
+
+<script>
+    $(function () {
+        @if(Model != null)
+        {
+            <text>
+        $('#CollegeList').val(@ViewBag.CollegeId);
+        $('#TermList').val(@ViewBag.TermId);
+
+        $(document).on('click', '#EditGroupDetails', function (e) {
+            e.preventDefault();
+            if (!$(this).attr('disabled')) {
+                $('.loadingWrapper').show();
+                var href = "/EducationalGroup/EditEducationalGroupManagerPresence/?group=" + $(this).data("id") + "&termId=" + @ViewBag.TermId;
+                $('#dialog').dialog({
+                    modal: true,
+                    open: function (event, ui) {
+                        $(this).load(href, function (result) { $('.loadingWrapper').hide(); });
+                        return false;
+                    },
+                    width: 768,
+                    maxHeight: 600,
+                    minHeight: 300,
+                    close: function (event, ui) { $('#dialog').html("") }
+                });
+            }
+            return false;
+        });
+        </text>
+        }
+        $(document).on('click', '#btnSelectCollege', function (e) {
+            e.preventDefault();
+            @if (canChangeCollege)
+            {
+                <text>
+            if($('#CollegeList').val() !== '' && $('#TermList').val() !== ''){
+                $('.loadingWrapper').show();
+                window.location.href = "/EducationalGroup/EducationalGroupManagerPresence/?college=" + $('#CollegeList').val() + "&termId=" + $('#TermList').val();
+            }
+            </text>
+        }
+        else
+        {
+                <text>
+            if($('#TermList').val() !== ''){
+                $('.loadingWrapper').show();
+                window.location.href = "/EducationalGroup/EducationalGroupManagerPresence/?termId=" + $('#TermList').val();
+            }
+        </text>
+    }
+            @*$('.loadingWrapper').show();
+            $.ajax({
+                url: '@Url.Action("EducationalGroupManagerPresenceForAdmin", "EducationalGroup")',
+                type: 'POST',
+                data: { 'college': $('#CollegeList').val() },
+                success: function (data) {
+                    window.location.href = "/EducationalGroup/EducationalGroupManagerPresence"
+                }
+            });*@
+        });
+
+        
+    });
+</script>

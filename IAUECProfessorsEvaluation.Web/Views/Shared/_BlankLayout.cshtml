@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    @RenderSection("metaTags", required: false)
+    <link rel="icon" href="/favicon.ico?v=2">
+    @*@Styles.Render("~/Content/css/bootstrap.min.css")
+    @Styles.Render("~/Content/css/bootstrap-rtl.min.css")
+    @Styles.Render("~/Content/themes/base/jquery-ui.min.css")
+    @Styles.Render("~/Content/css/font-awesome.min.css")
+    @Styles.Render("~/Content/css/custom.min.css")
+    @Styles.Render("~/Content/css/BlankLayout.css")*@
+    @Styles.Render("~/Content/css/blank")
+    @RenderSection("styles", required: false)
+
+
+        @*@Scripts.Render("~/Content/js/jquery.min.js")*@
+    @Scripts.Render("~/Content/js/bootstrap.min.js")
+    @Scripts.Render("~/Scripts/jquery-ui-1.12.1.min.js")
+    <title>سامانه رتبه بندی اساتید، گروه ها و دانشکده ها | @ViewBag.Title</title>
+    <style>
+        .container {
+            width: 100%;
+            padding: 0;
+        }
+
+        .top_nav .navbar-right {
+            margin: 0;
+        }
+        .textCenter {
+    text-align:center;
+}
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        @RenderBody()
+    </div>
+</body>
+</html>

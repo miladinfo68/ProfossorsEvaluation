@@ -1,0 +1,118 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29519.87
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IAUECProfessorsEvaluation.Model", "IAUECProfessorsEvaluation.Model\IAUECProfessorsEvaluation.Model.csproj", "{862A05D9-F6A1-4C57-9579-086F475CB396}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IAUECProfessorsEvaluation.Data", "IAUECProfessorsEvaluation.Data\IAUECProfessorsEvaluation.Data.csproj", "{860EFCFB-E287-4DCF-980E-17154149B4CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IAUECProfessorsEvaluation.Service", "IAUECProfessorsEvaluation.Service\IAUECProfessorsEvaluation.Service.csproj", "{583A5A01-BCF8-4E98-B538-14F4EA3A41B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IAUECProfessorsEvaluation.Core", "IAUECProfessorsEvaluation.Core\IAUECProfessorsEvaluation.Core.csproj", "{18D3593B-041C-408F-A944-1B107092BC8D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IAUECProfessorsEvaluation.Web", "IAUECProfessorsEvaluation.Web\IAUECProfessorsEvaluation.Web.csproj", "{195B47EC-AA4A-4B02-ADBB-29948017F8DB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{583A5A01-BCF8-4E98-B538-14F4EA3A41B8} = {583A5A01-BCF8-4E98-B538-14F4EA3A41B8}
+		{862A05D9-F6A1-4C57-9579-086F475CB396} = {862A05D9-F6A1-4C57-9579-086F475CB396}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{862A05D9-F6A1-4C57-9579-086F475CB396}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{862A05D9-F6A1-4C57-9579-086F475CB396}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{862A05D9-F6A1-4C57-9579-086F475CB396}.Debug|x64.ActiveCfg = Debug|x64
+		{862A05D9-F6A1-4C57-9579-086F475CB396}.Debug|x64.Build.0 = Debug|x64
+		{862A05D9-F6A1-4C57-9579-086F475CB396}.Debug|x86.ActiveCfg = Debug|x86
+		{862A05D9-F6A1-4C57-9579-086F475CB396}.Debug|x86.Build.0 = Debug|x86
+		{862A05D9-F6A1-4C57-9579-086F475CB396}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{862A05D9-F6A1-4C57-9579-086F475CB396}.Release|Any CPU.Build.0 = Release|Any CPU
+		{862A05D9-F6A1-4C57-9579-086F475CB396}.Release|x64.ActiveCfg = Release|x64
+		{862A05D9-F6A1-4C57-9579-086F475CB396}.Release|x64.Build.0 = Release|x64
+		{862A05D9-F6A1-4C57-9579-086F475CB396}.Release|x86.ActiveCfg = Release|x86
+		{862A05D9-F6A1-4C57-9579-086F475CB396}.Release|x86.Build.0 = Release|x86
+		{860EFCFB-E287-4DCF-980E-17154149B4CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{860EFCFB-E287-4DCF-980E-17154149B4CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{860EFCFB-E287-4DCF-980E-17154149B4CF}.Debug|x64.ActiveCfg = Debug|x64
+		{860EFCFB-E287-4DCF-980E-17154149B4CF}.Debug|x64.Build.0 = Debug|x64
+		{860EFCFB-E287-4DCF-980E-17154149B4CF}.Debug|x86.ActiveCfg = Debug|x86
+		{860EFCFB-E287-4DCF-980E-17154149B4CF}.Debug|x86.Build.0 = Debug|x86
+		{860EFCFB-E287-4DCF-980E-17154149B4CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{860EFCFB-E287-4DCF-980E-17154149B4CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{860EFCFB-E287-4DCF-980E-17154149B4CF}.Release|x64.ActiveCfg = Release|x64
+		{860EFCFB-E287-4DCF-980E-17154149B4CF}.Release|x64.Build.0 = Release|x64
+		{860EFCFB-E287-4DCF-980E-17154149B4CF}.Release|x86.ActiveCfg = Release|x86
+		{860EFCFB-E287-4DCF-980E-17154149B4CF}.Release|x86.Build.0 = Release|x86
+		{583A5A01-BCF8-4E98-B538-14F4EA3A41B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{583A5A01-BCF8-4E98-B538-14F4EA3A41B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{583A5A01-BCF8-4E98-B538-14F4EA3A41B8}.Debug|x64.ActiveCfg = Debug|x64
+		{583A5A01-BCF8-4E98-B538-14F4EA3A41B8}.Debug|x64.Build.0 = Debug|x64
+		{583A5A01-BCF8-4E98-B538-14F4EA3A41B8}.Debug|x86.ActiveCfg = Debug|x86
+		{583A5A01-BCF8-4E98-B538-14F4EA3A41B8}.Debug|x86.Build.0 = Debug|x86
+		{583A5A01-BCF8-4E98-B538-14F4EA3A41B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{583A5A01-BCF8-4E98-B538-14F4EA3A41B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{583A5A01-BCF8-4E98-B538-14F4EA3A41B8}.Release|x64.ActiveCfg = Release|x64
+		{583A5A01-BCF8-4E98-B538-14F4EA3A41B8}.Release|x64.Build.0 = Release|x64
+		{583A5A01-BCF8-4E98-B538-14F4EA3A41B8}.Release|x86.ActiveCfg = Release|x86
+		{583A5A01-BCF8-4E98-B538-14F4EA3A41B8}.Release|x86.Build.0 = Release|x86
+		{18D3593B-041C-408F-A944-1B107092BC8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18D3593B-041C-408F-A944-1B107092BC8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18D3593B-041C-408F-A944-1B107092BC8D}.Debug|x64.ActiveCfg = Debug|x64
+		{18D3593B-041C-408F-A944-1B107092BC8D}.Debug|x64.Build.0 = Debug|x64
+		{18D3593B-041C-408F-A944-1B107092BC8D}.Debug|x86.ActiveCfg = Debug|x86
+		{18D3593B-041C-408F-A944-1B107092BC8D}.Debug|x86.Build.0 = Debug|x86
+		{18D3593B-041C-408F-A944-1B107092BC8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18D3593B-041C-408F-A944-1B107092BC8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18D3593B-041C-408F-A944-1B107092BC8D}.Release|x64.ActiveCfg = Release|x64
+		{18D3593B-041C-408F-A944-1B107092BC8D}.Release|x64.Build.0 = Release|x64
+		{18D3593B-041C-408F-A944-1B107092BC8D}.Release|x86.ActiveCfg = Release|x86
+		{18D3593B-041C-408F-A944-1B107092BC8D}.Release|x86.Build.0 = Release|x86
+		{195B47EC-AA4A-4B02-ADBB-29948017F8DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{195B47EC-AA4A-4B02-ADBB-29948017F8DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{195B47EC-AA4A-4B02-ADBB-29948017F8DB}.Debug|x64.ActiveCfg = Debug|x64
+		{195B47EC-AA4A-4B02-ADBB-29948017F8DB}.Debug|x64.Build.0 = Debug|x64
+		{195B47EC-AA4A-4B02-ADBB-29948017F8DB}.Debug|x86.ActiveCfg = Debug|x86
+		{195B47EC-AA4A-4B02-ADBB-29948017F8DB}.Debug|x86.Build.0 = Debug|x86
+		{195B47EC-AA4A-4B02-ADBB-29948017F8DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{195B47EC-AA4A-4B02-ADBB-29948017F8DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{195B47EC-AA4A-4B02-ADBB-29948017F8DB}.Release|x64.ActiveCfg = Release|x64
+		{195B47EC-AA4A-4B02-ADBB-29948017F8DB}.Release|x64.Build.0 = Release|x64
+		{195B47EC-AA4A-4B02-ADBB-29948017F8DB}.Release|x86.ActiveCfg = Release|x86
+		{195B47EC-AA4A-4B02-ADBB-29948017F8DB}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C375E8AC-3DC5-4F49-A7E0-6FB725D651B1}
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 6
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://192.168.4.21:8080/tfs/defaultcollection
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = IAUECProfessorsEvaluation.Model\\IAUECProfessorsEvaluation.Model.csproj
+		SccProjectName1 = IAUECProfessorsEvaluation.Model
+		SccLocalPath1 = IAUECProfessorsEvaluation.Model
+		SccProjectUniqueName2 = IAUECProfessorsEvaluation.Data\\IAUECProfessorsEvaluation.Data.csproj
+		SccProjectName2 = IAUECProfessorsEvaluation.Data
+		SccLocalPath2 = IAUECProfessorsEvaluation.Data
+		SccProjectUniqueName3 = IAUECProfessorsEvaluation.Service\\IAUECProfessorsEvaluation.Service.csproj
+		SccProjectName3 = IAUECProfessorsEvaluation.Service
+		SccLocalPath3 = IAUECProfessorsEvaluation.Service
+		SccProjectUniqueName4 = IAUECProfessorsEvaluation.Core\\IAUECProfessorsEvaluation.Core.csproj
+		SccProjectName4 = IAUECProfessorsEvaluation.Core
+		SccLocalPath4 = IAUECProfessorsEvaluation.Core
+		SccProjectUniqueName5 = IAUECProfessorsEvaluation.Web\\IAUECProfessorsEvaluation.Web.csproj
+		SccProjectName5 = IAUECProfessorsEvaluation.Web
+		SccLocalPath5 = IAUECProfessorsEvaluation.Web
+	EndGlobalSection
+EndGlobal

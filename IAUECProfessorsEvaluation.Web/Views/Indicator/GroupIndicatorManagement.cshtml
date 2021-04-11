@@ -1,0 +1,137 @@
+﻿@{Layout = "~/Views/Shared/_Layout.cshtml";}
+@using GridMvc.Html
+@model List<IAUECProfessorsEvaluation.Web.Models.Indicator>
+
+<style>
+    .btn-fixedWidth {
+        width: 100px;
+    }
+</style>
+
+
+@*<div class="row">
+    <div class="col-sm-12">
+        <a href="/" class="btn btn-success" id="AddEducationalGroupIndicator"><i class="fa fa-plus-circle "></i> افزودن شاخص جدید</a>
+    </div>
+</div>*@
+<div class="row">
+    <div class="col-sm-12">
+        @(Html
+    .Grid(Model)
+    .Columns(columns =>
+    {
+        columns.Add(model => model.Name).Titled("عنوان");
+        columns.Add(model => model.Ratio.Name).Titled("اهمیت");
+        columns.Add(model => model.Id).Titled("عملیات")
+            .Encoded(false).Sanitized(false)
+            .RenderValueAs(o => "<a id=\"UpdateGroupIndicator\" data-id=\"" + o.Id + "\" href=\"/\" class=\"btn btn-info\"><i class=\"fa fa-pencil\"></i> ویرایش</a><a id=\"DeleteGroupIndicator\" data-id=\"" + o.Id + "\" href=\"/\" class=\"btn " + ((bool)o.IsActive ? "btn-warning" : "btn-default") + " btn-fixedWidth\">" + ((bool)o.IsActive ? "غیر فعالسازی" : "فعالسازی") + "</a>");
+        //<input type=\"button\" value=\"Go Somewhere Else\" onclick=\"location.href='<%: Url.Action(\"myMethod\", \"myController\") %>'\" />
+    })
+    .Filterable()
+    .Sortable()
+    .WithPaging(20)
+    .EmptyText("موردی جهت نمایش یافت نشد.")
+    .SetLanguage("fa")
+        )
+    </div>
+    <div id="dialog"></div>
+
+    <script type="text/javascript">
+    $(function () {
+        $(document).on('click', '#AddEducationalGroupIndicator', function () {
+            var href = "/Indicator/AddOrUpdateGroupIndicator";
+            $('#dialog').dialog({
+                modal: true,
+                open: function (event, ui) {
+                    $(this).load(href, function (result) {
+                        $('#AddOrUpdateGroupIndicatorForm').submit(function () {
+                            $.ajax({
+                                url: this.action,
+                                type: this.method,
+                                data: $(this).serialize(),
+                                success: function (json) {
+                                    window.location.href = window.location.href;
+                                }
+                            });
+                            return false;
+                        });
+                    });
+                },
+                width: 768,
+                maxHeight: 600,
+                minHeight: 600,
+                position: { my: 'center top', at: 'center top' },
+                close: function (event, ui) {
+                    $('#dialog').html('');
+                }
+            });
+            return false;
+        });
+
+        $(document).on('click', '#UpdateGroupIndicator', function (e) {
+            e.preventDefault();
+            var href = "/Indicator/AddOrUpdateGroupIndicator/" + $(this).data("id");
+            $('#dialog').dialog({
+                modal: true,
+                open: function (event, ui) {
+                    $(this).load(href, function (result) {
+                        $('#AddOrUpdateGroupIndicatorForm').submit(function () {
+
+                            $.ajax({
+                                url: this.action,
+                                type: this.method,
+                                data: $(this).serialize(),
+                                success: function (json) {
+                                    window.location.href = window.location.href;
+                                }
+                            });
+                            return false;
+                        });
+                    });
+                },
+                width: 768,
+                maxHeight: 600,
+                minHeight: 600,
+                position: { my: 'center top', at: 'center top' },
+                close: function (event, ui) {
+                    $('#dialog').html('');
+                }
+            });
+        });
+
+        $(document).on('click', '#DeleteGroupIndicator', function (e) {
+            e.preventDefault();
+            var btn = $(this);
+            $.ajax({
+                url: '/Indicator/EnableOrDisableIndicator',
+                type: 'POST',
+                contentType: "application/json",
+                dataType: "json",
+                data: "{'Id':'" + $(this).data("id") + "'}",
+                success: function (json) {
+                    if (json.status)
+                        btn.html('غیر فعال');
+                    else
+                        btn.html('فعال');
+                }
+            });
+
+
+            //var href = "/Indicator/DeleteGroupIndicator";
+            //if (confirm('آیا از حذف این شاخص اطمینان دارید?')) {
+            //    $.ajax({
+            //        url: href,
+            //        contentType: "application/json",
+            //        dataType: "json",
+            //        type: 'POST',
+            //        data: "{'Id':'" + $(this).data("id") + "'}",
+            //        success: function () {
+            //            window.location.href = window.location.href;
+            //        }
+            //    });
+            //}
+            //return false;
+        });
+    });
+    </script>
+</div>

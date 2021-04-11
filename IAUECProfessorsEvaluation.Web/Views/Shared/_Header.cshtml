@@ -1,0 +1,60 @@
+﻿<style>
+    .pageTitle {
+        background: #e6e6e6;
+        padding: 10px 15px;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+        .pageTitle .currentPage {
+            font-size: 12px;
+            font-weight: normal;
+            color: #999;
+        }
+
+        .pageTitle .currentPageTitle {
+            margin-right: 10px;
+        }
+</style>
+
+<div class="top_nav hidden-print">
+    <div class="nav_menu">
+        <nav>
+            <div class="nav toggle">
+                <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+            </div>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li class="">
+                    <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown"
+                       aria-expanded="false">
+                        <img src="../build/images/img.jpg" alt="">@ViewBag.FullName
+                        <span class="fa fa-angle-down"></span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-usermenu pull-right">
+                        <li><a href="/" id="logoff"><i class="fa fa-sign-out pull-right"></i> خروج</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="pageTitle">
+        <span class="currentPage">صفحه جاری: </span>
+        <span class="currentPageTitle">@ViewBag.Title</span>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $('#logoff').click(function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: '/Pages/LogOff',
+                type: 'Post',
+                success: function (r) {
+                    window.location = window.location;
+                }
+            });
+        });
+    });
+</script>

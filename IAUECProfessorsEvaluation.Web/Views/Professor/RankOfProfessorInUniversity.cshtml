@@ -1,0 +1,226 @@
+﻿@{Layout = "~/Views/Shared/_Layout.cshtml";}
+@using IAUECProfessorsEvaluation.Data.ReportModel
+@model List<ProfessorDetialReportModel>
+@using GridMvc.Html
+
+<style>
+    .searchRow {
+        border-bottom: 1px solid #ccc;
+        background: #ddd;
+        margin-left: -20px;
+        margin-right: -20px;
+        min-height: 70px;
+    }
+
+        .searchRow .form-group {
+            margin-bottom: 0;
+            margin-top: 8px;
+        }
+
+        .searchRow .control-label {
+            line-height: 36px;
+            font-size: 16px;
+        }
+
+    .topProfessorImage {
+        position: absolute;
+        left: 10px;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        height: 70px;
+        overflow: hidden;
+        width: 25%;
+        max-width: 70px;
+        border: 2px solid #ccc;
+        border-radius: 50%;
+        text-align: center;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+        .topProfessorImage img {
+            width: 100%;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 15px;
+            bottom: 0;
+            margin: auto;
+        }
+
+    .topProfessorName {
+        display: inline-block;
+        vertical-align: top;
+        width: 75%;
+        white-space: pre-wrap;
+    }
+    /*------------*/
+    .tile_count .tile_stats_count::before {
+        height: 80%;
+    }
+    /*------------*/
+</style>
+
+<div class="row searchRow">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-12">
+                    <span style="display: inline-block; padding: 0 0 10px;">
+                        تاریخ آخرین بروزرسانی: @ViewBag.LastUpdate
+                    </span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-1">
+                    <span class="control-label">ترم: </span>
+                </div>
+                <div class="col-sm-2">
+                    @Html.DropDownList("TermList", (SelectList)ViewBag.TermList, "انتخاب کنید", new { @class = "form-control" })
+                </div>
+                <div class="col-sm-1">
+                    <a href="/" id="showResult" class="btn btn-info"><i class="fa fa-search"></i> نمایش</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@if (Model != null)
+{
+    if (Model.Count > 0)
+    {
+        <div class="row tileTitle">
+            <div class="col-sm-12">
+                <h3>اساتید برتر دانشگاه</h3>
+            </div>
+        </div>
+    }
+    <div class="row tile_count">
+        @if (Model.Count > 0)
+        {
+            <div class="col-md-4 col-sm-4 col-xs-6 tile_stats_count">
+                <span class="count_top"><i class="fa fa-user"></i> رتبه اول</span>
+                <div class="count green">
+                    <div class="topProfessorName"><span>@(Model.ElementAt(0).Gender ? "جناب آقای" : "سرکار خانم") </span>@Model.ElementAt(0).FullName</div>
+                    <div class="topProfessorImage">
+                        <img src="~/Content/images/person.png" />
+                    </div>
+                </div>
+            </div>
+        }
+        @if (Model.Count > 1)
+        {
+            <div class="col-md-4 col-sm-4 col-xs-6 tile_stats_count">
+                <span class="count_top"><i class="fa fa-user"></i> رتبه دوم</span>
+                <div class="count green">
+                    <div class="topProfessorName"><span>@(Model.ElementAt(1).Gender ? "جناب آقای" : "سرکار خانم") </span>@Model.ElementAt(1).FullName</div>
+                    <div class="topProfessorImage">
+                        <img src="~/Content/images/person.png" />
+                    </div>
+                </div>
+            </div>
+        }
+        @if (Model.Count > 2)
+        {
+            <div class="col-md-4 col-sm-4 col-xs-6 tile_stats_count">
+                <span class="count_top"><i class="fa fa-user"></i> رتبه سوم</span>
+                <div class="count green">
+                    <div class="topProfessorName"><span>@(Model.ElementAt(2).Gender ? "جناب آقای" : "سرکار خانم") </span>@Model.ElementAt(2).FullName</div>
+                    <div class="topProfessorImage">
+                        <img src="~/Content/images/person.png" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+        <div class="row">
+            <div class="col-sm-12">
+                @(Html
+    .Grid(Model)
+    .Columns(columns =>
+    {
+        columns.Add(model => model.RowNumber).Titled("رتبه").SetWidth("10%").Filterable(true).Sortable(true);
+        columns.Add(model => model.FullName).Titled("نام استاد").SetWidth("25%").Filterable(true).Sortable(true);
+        columns.Add(model => model.NationalCode).Titled("کد ملی").SetWidth("25%").Filterable(true).Sortable(false);
+        columns.Add(model => model.ProfessorCode).Titled("کد استاد").SetWidth("15%").Filterable(true).Sortable(true);
+        columns.Add(model => model.ProfessorScore).Titled("امتیاز فعلی").SetWidth("15%").Filterable(true).Sortable(true);
+        columns.Add(model => model.IndicatorId).Titled("عملیات").SetWidth("10%").Filterable(false)
+            .Encoded(false).Sanitized(false)
+            .RenderValueAs(o => "<a id=\"ViewRankDetails\" href=\"/\" class=\"btn btn-info\" data-id=\"" + o.ProfessorId + "\"><i class=\"fa fa-info\"></i> مشاهده جزئیات</a>");
+    })
+    .WithMultipleFilters()
+    .WithPaging(20)
+    .EmptyText("موردی جهت نمایش یافت نشد.")
+    .SetLanguage("fa")
+                )
+            </div>
+            <div id="dialog"></div>
+        </div>
+}
+
+<script>
+    $(function () {
+        $(document).on('click', '#ViewRankDetails', function (e) {
+            e.preventDefault();
+            //var href = "/Professor/ViewProfessorRankInUniversityDetails/" + $(this).data("id");
+            //$('#dialog').dialog({
+            //    modal: true,
+            //    open: function (event, ui) {
+            //        $(this).load(href, function (result) { });
+            //        return false;
+            //    },
+            //    width: 768,
+            //    maxHeight: 600,
+            //    minHeight: 300,
+            //    position: { my: 'center top', at: 'center top' },
+            //    close: function (event, ui) { $('#dialog').html("") }
+            //});
+            $.ajax({
+                url: '@Url.Action("ViewProfessorRankInUniversityDetails", "Professor")',
+                type: 'Get',
+                data: { 'id': $(this).data("id"), 'termId': $('#TermList').val() },
+                success: function (data) {
+                    $("#dialog").html(data);
+                    $('#dialog').dialog({
+                        modal: true,
+                        width: 768,
+                        maxHeight: 600,
+                        minHeight: 300,
+                        position: { my: 'center top', at: 'center top' },
+                        close: function (event, ui) {
+                            $('#dialog').html("")
+                        }
+                    });
+                }
+            });
+            return false;
+        });
+
+        $(document).on('click', '#showResult', function (e) {
+            e.preventDefault();
+            $('.loadingWrapper').show();
+            var ddlTerm = document.getElementById("TermList");
+            var termId = ddlTerm.options[ddlTerm.selectedIndex].value;
+            if (termId != '')
+                window.location.href = '/Professor/RankOfProfessorInUniversity/?term=' + termId;
+        });
+
+        /////////////
+        function getUrlVars() {
+            var vars = [], hash;
+            var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+            for (var i = 0; i < hashes.length; i++) {
+                hash = hashes[i].split('=');
+                vars.push(hash[0]);
+                vars[hash[0]] = hash[1];
+            }
+            return vars;
+        }
+        if (getUrlVars().length > 0) {
+            var term = getUrlVars()["term"];
+            $('#TermList').val(term);
+        }
+        /////////////
+    });
+</script>

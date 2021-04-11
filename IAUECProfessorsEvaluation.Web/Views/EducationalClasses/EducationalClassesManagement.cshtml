@@ -1,0 +1,211 @@
+﻿@{Layout = "~/Views/Shared/_Layout.cshtml";}
+@model List<IAUECProfessorsEvaluation.Model.Models.EducationalClass>
+@using GridMvc.Html
+@{
+    var canChangeGroup = Session["UserInfo"] != null
+        && (((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsAdministrator || ((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsPowerUser);
+}
+
+<style>
+    .searchRow {
+        border-bottom: 1px solid #ccc;
+        background: #ddd;
+        margin-left: -20px;
+        margin-right: -20px;
+        height: 50px;
+    }
+
+        .searchRow .form-group {
+            margin-bottom: 0;
+            margin-top: 8px;
+        }
+
+        .searchRow .control-label {
+            line-height: 36px;
+            font-size: 16px;
+        }
+
+    .marginTop {
+        margin-top: 75px;
+    }
+
+    .topPanel {
+        margin-top: 10px;
+    }
+</style>
+
+
+<div class="row searchRow">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-1">
+                    <span class="control-label">ترم: </span>
+                </div>
+                <div class="col-sm-3">
+                    @Html.DropDownList("TermList", (SelectList)ViewBag.TermList, "انتخاب کنید", new { @class = "form-control termList" })
+                </div>
+                @if (canChangeGroup)
+                {
+                    <div class="col-sm-1">
+                        <span class="control-label">نام گروه: </span>
+                    </div>
+                    <div class="col-sm-3">
+                        @Html.DropDownList("GroupList", (SelectList)ViewBag.CollegeList, "انتخاب کنید", new { @class = "form-control groupList" })
+                    </div>
+                }
+                <div class="col-sm-2">
+                    <a href="/" id="btnSelectGroup" class="btn btn-info">انتخاب</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@if (Model != null)
+{
+    <div class="row topPanel">
+        <div class="col-sm-12">
+            <a href="#" class="btn btn-info" id="btnUploadExcelWindow">
+                <i class="fa fa-plus"></i> <span>بارگذاری اطلاعات بصورت گروهی</span>
+            </a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            @Html.Grid(Model).Columns(columns =>
+   {
+       columns.Add(model => model.CodeClass).Titled("کد کلاس").SetWidth("10%").Filterable(true).Sortable(true);
+       columns.Add(model => model.Name).Titled("عنوان کلاس").SetWidth("25%").Filterable(true).Sortable(true);
+       columns.Add(model => model.Professor.Name).RenderValueAs(o => o.Professor.Name + " " + o.Professor.Family).Titled("نام استاد").SetWidth("25%").Filterable(true).Sortable(true);
+
+       columns.Add(model => model.OnlineHeldingCount).Titled("تعداد جلسات برگزار شده آنلاین").SetWidth("10%").Filterable(true).Sortable(true);
+       columns.Add(model => model.PersentHeldingCount).Titled("تعداد جلسات برگزار شده حضوری").SetWidth("10%").Filterable(true).Sortable(true);
+       columns.Add(model => model.OthersHeldingCount).Titled("تعداد سایر جلسات (تعطیلات رسمی و ...)").SetWidth("10%").Filterable(true).Sortable(true);
+
+       columns.Add(model => model.Id).Titled("عملیات").SetWidth("10%").Filterable(false)
+       .Encoded(false).Sanitized(false)
+       .RenderValueAs(o => "<a id=\"EditClassDetails\" href=\"/\" class=\"btn btn-info\" data-id=\"" + o.CodeClass + "\"><i class=\"fa fa-info\"></i> ویرایش</a>");
+   }).WithMultipleFilters().WithPaging(20).EmptyText("موردی جهت نمایش یافت نشد.").SetLanguage("fa")
+        </div>
+        <div id="dialog"></div>
+    </div>
+}
+else if (((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]) != null && !(((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsAdministrator || ((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsPowerUser))
+{
+    <div class="alert alert-danger marginTop">
+        <span>گروهی برای شما تعیین نشده است.</span>
+    </div>
+}
+
+<script>
+    $(function () {
+        $(document).on('click', '#btnSelectGroup', function (e) {
+            e.preventDefault();
+            @if (canChangeGroup)
+            {
+                <text>
+            if ($('#GroupList').val() !== '' && $('#TermList').val() !== '') {
+                $('.loadingWrapper').show();
+                window.location.href = "/EducationalClasses/EducationalClassesManagement/?group=" + $('#GroupList').val() + "&termId=" + $('#TermList').val();
+            }
+            </text>
+            }
+            else
+            {
+                <text>
+            if($('#TermList').val() !== ''){
+                $('.loadingWrapper').show();
+                window.location.href = "/EducationalClasses/EducationalClassesManagement/?termId=" + $('#TermList').val();
+            }
+            </text>
+            }
+
+
+
+            @*$.ajax({
+                url: '@Url.Action("EducationalClassesManagementForAdmin", "EducationalClasses")',
+                type: 'POST',
+                data: { 'group': $('#GroupList').val() },
+                success: function (data) {
+                    window.location.href = "/EducationalClasses/EducationalClassesManagement"
+                }
+            });*@
+        });
+        @if(Model != null)
+        {
+            <text>
+        $('#GroupList').val(@ViewBag.GroupId);
+        $('#TermList').val(@ViewBag.TermId);
+        </text>
+        }
+
+
+        $(document).on('click', '#EditClassDetails', function (e) {
+            e.preventDefault();
+            @if (!string.IsNullOrEmpty(Request.QueryString["termId"]))
+            {
+                <text>
+
+            var href = "/EducationalClasses/EditClassDetails/?class=" + $(this).data("id") + "&termId=" + @Request.QueryString["termId"];
+            $('#dialog').dialog({
+                modal: true,
+                open: function (event, ui) {
+                    $(this).load(href, function (result) { });
+                    return false;
+                },
+                width: 768,
+                maxHeight: 600,
+                minHeight: 300,
+                close: function (event, ui) { $('#dialog').html("") }
+            });
+            </text>
+        }
+            return false;
+        });
+
+        $(document).on('click', '#btnUploadExcelWindow', function (e) {
+            e.preventDefault();
+            @if (!string.IsNullOrEmpty(Request.QueryString["group"])) {
+                    <text>
+            var href = "/EducationalClasses/UpdateClassInfoFromExcel/?group=" + @Request.QueryString["group"] + "&termId=" + @Request.QueryString["termId"];
+            $('#dialog').dialog({
+                modal: true,
+                open: function (event, ui) {
+                    $(this).load(href, function (result) { });
+                    return false;
+                },
+                width: 768,
+                maxHeight: 300,
+                minHeight: 100,
+                close: function (event, ui) { $('#dialog').html(""); location.reload(); }
+            });
+            </text>
+    }
+            return false;
+        });
+
+        $('.termList').on('change', function () {
+            $('.groupList').html('<option>انتخاب کنید</option>');
+            if ($('.termList').val() != '') {
+                $('.loadingWrapper').show();
+                $.ajax({
+                    url: '@Url.Action("GetGroupsByTermId", "Professor")',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    method: 'GET',
+                    data: { termId: $('.termList').val() },
+                    success: function (e) {
+                        if (e != null) {
+                            $.each(e, function (i, v) {
+                                $('.groupList').append('<option value="' + v.EducationalGroupCode + '">' + v.Name +'</option>')
+                            });
+                        }
+                        $('.loadingWrapper').hide();
+                    }
+                });
+            }
+        });
+    });
+</script>

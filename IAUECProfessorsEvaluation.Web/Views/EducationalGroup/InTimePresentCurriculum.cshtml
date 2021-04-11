@@ -1,0 +1,324 @@
+﻿@{Layout = "~/Views/Shared/_Layout.cshtml";}
+@model List<IAUECProfessorsEvaluation.Model.Models.EducationalGroup>
+@using GridMvc.Html
+@using IAUECProfessorsEvaluation.Core.Helper
+
+@{
+    var canChangeCollege = Session["UserInfo"] != null
+        && (((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsAdministrator || ((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsPowerUser);
+}
+
+<link rel="stylesheet" href="~/Content/css/starrr.css">
+<style type='text/css'>
+    .tooltip {
+        opacity: 0.7;
+        background: #000;
+    }
+
+    .tooltip-inner {
+        padding: 3px 5px;
+    }
+
+    .ui-tooltip, .arrow:after {
+        background: black;
+        border: 1px solid white;
+    }
+
+    .ui-tooltip {
+        padding: 10px 20px;
+        color: white;
+        border-radius: 5px;
+        box-shadow: 0 0 7px black;
+    }
+    .searchRow {
+        border-bottom: 1px solid #ccc;
+        background: #ddd;
+        margin-left: -20px;
+        margin-right: -20px;
+        height: 70px;
+    }
+
+        .searchRow .form-group {
+            margin-bottom: 0;
+            margin-top: 8px;
+        }
+
+        .searchRow .control-label {
+            line-height: 36px;
+            font-size: 16px;
+        }
+    .marginTop{margin-top: 75px;}
+</style>
+<script src="~/Content/js/popper.min.js"></script>
+<script src="~/Content/js/starrr.js"></script>
+
+
+    <div class="row searchRow">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <div class="row">
+@if (canChangeCollege)
+{
+                    <div class="col-sm-2">
+                        <span class="control-label">نام دانشکده: </span>
+                    </div>
+                    <div class="col-sm-3">
+                        @Html.DropDownList("CollegeList", (SelectList)ViewBag.CollegeList, "انتخاب کنید", new { @class = "form-control" })
+                    </div>
+                    }
+                    <div class="col-sm-1">
+                        <span class="control-label">ترم: </span>
+                    </div>
+                    <div class="col-sm-3">
+                        @Html.DropDownList("TermList", (SelectList)ViewBag.TermList, "انتخاب کنید", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-2">
+                        <a href="/" id="btnSelectCollege" class="btn btn-info">انتخاب</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+@if (Model == null && ((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]) != null && !(((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsAdministrator || ((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsPowerUser))
+{
+    <div class="alert alert-danger marginTop">شاخص "ارائه برنامه درسی توسط مدیر گروه در موعد مقرر" ایجاد نشده و یا دانشکده ای برای شما تعیین نشده است.</div>
+}
+else if (Model != null)
+{
+
+    <div class="row">
+        <div class="col-sm-12">
+            @(Html
+    .Grid(Model)
+    .Columns(columns =>
+    {
+        columns.Add(model => model.EducationalGroupCode).Titled("کد گروه").SetWidth("10%").Filterable(true).Sortable(true);
+        columns.Add(model => model.Name).Titled("عنوان گروه").SetWidth("15%").Filterable(true).Sortable(false);
+        columns.Add(model => model.GroupManger.Family).Titled("نام مدیر گروه").RenderValueAs(o => o.GroupManger != null ? (o.GroupManger.Name + " " + o.GroupManger.Family) : "مدیر گروه ندارد").SetWidth("25%").Filterable(true).Sortable(true);
+        columns.Add(model => model.InTimePresentCurriculum).Titled("امتیاز فعلی").SetWidth("15%").Filterable(true).Sortable(true).RenderValueAs(o => Convert.ToInt32(o.InTimePresentCurriculum) > 0 ? o.InTimePresentCurriculum : "-");
+        columns.Add(model => model.EducationalGroupScores).Titled("عملیات").SetWidth("20%").Filterable(false)
+            .Encoded(false).Sanitized(false)
+            .RenderValueAs(o => "<select class=\"scoreList\"></select><input class=\"currentScore\" type=\"hidden\" value=\"" + (Convert.ToInt32(o.InTimePresentCurriculum) > 0 ? o.InTimePresentCurriculum : "-1") + "\" />");
+        //.RenderValueAs(o => "<div class='starrr' id='star" + o.EducationalGroupCode + "'></div> <a href=\"/\" title=\"حذف امتیاز\" class=\"resetScore\" data-code=\"" + o.EducationalGroupCode + "\"><i class=\"fa fa-ban\"></i></a>");
+    })
+    .WithMultipleFilters()
+    .WithPaging(20)
+    .EmptyText("موردی جهت نمایش یافت نشد.")
+    .SetLanguage("fa")
+    .Selectable(false)
+            )
+        </div>
+    </div>
+
+    <script>
+
+        $(function () {
+            var scores = [];
+            var points = [];
+            @foreach (var item in ViewBag.Scores) {
+                <text>
+            scores.push('@item.Name');
+                points.push('@item.Point');
+            </text>
+            }
+
+            $('.scoreList').empty().append('<option value="-1">انتخاب کنید</option>');
+            $.each(scores, function (i, v) {
+                $('.scoreList').append('<option value="' + points[i] + '">' + v + '</option>');
+            });
+
+            var itemsCount = 0;
+            var modelCount = $('.scoreList').length;
+            $('.scoreList').each(function(){
+                var item = $(this);
+                if(item.parent().find('.currentScore').val() == "-1"){
+                    item.val("-1");
+                    itemsCount++;
+                }
+                else{
+                    var id = $(this).parent().parent().find('td:nth-child(1)').html();
+                    $.ajax({
+                        url: '/EducationalGroup/GetCurrentStar',
+                        type: 'POST',
+                        data: { currentRateData: item.parent().find('.currentScore').val(), countOfType: 'g' + @((int)IndicatorGroupName.ارائه_به_موقع_برنامه_درسی_توسط_مدیرگروه_در_موعد_مقرر)},
+                success : function(val){
+                    item.val(val);
+                    itemsCount++;
+                    if(itemsCount === modelCount)
+                        $('.loadingWrapper').hide();
+                    else
+                        $('.loadingWrapper').show();
+                }
+            });
+        }
+            });
+
+            $('.scoreList').change(function () {
+                $('.loadingWrapper').show();
+                var selectedValue = $(this).val();
+                var el = $(this);
+                if(selectedValue == "-1"){
+                    $.ajax({
+                        url: '/EducationalGroup/DeleteInTimePresent',
+                        type: 'POST',
+                        data: { code: el.parent().parent().find('td:nth-child(1)').html(), collegeId: @(ViewBag.CollegeId), termData: @(ViewBag.TermId)},
+                        success: function(result){
+                            el.parent().parent().find('td:nth-child(4)').html("-");
+                            el.parent().find('.currentScore').val("-1");
+                            $('.loadingWrapper').hide();
+                        }
+                    });
+                }
+                else{
+                    var gc = el.parent().parent().find('td:nth-child(1)').html();
+                    $.ajax({
+                        url: '/EducationalGroup/AddOrUpdateInTimePresent',
+                        type: 'POST',
+                        data: { groupData: gc, rateIndex: selectedValue, countOfType: 'g' + @((int)IndicatorGroupName.ارائه_به_موقع_برنامه_درسی_توسط_مدیرگروه_در_موعد_مقرر), termId: @(ViewBag.TermId)},
+                success: function (result) {
+                    el.parent().parent().find('td:nth-child(4)').html(result);
+                    el.parent().find('.currentScore').val(result);
+                    $('.loadingWrapper').hide();
+                }
+            });
+        }
+        });
+
+
+            @*if(@ViewBag.Scores.Count > 0){
+                @foreach (var item in Model)
+        {
+            var id = "#star" + item.EducationalGroupCode;
+        <text>
+                var itemsCount = 0;
+                var modelCount = @Model.Count();
+                $.ajax({
+                    url: '/EducationalGroup/GetCurrentStar',
+                    type: 'POST',
+                    data: { currentRateData: @(string.IsNullOrEmpty(item.InTimePresentCurriculum) ? "0" : item.InTimePresentCurriculum), indicatorName: 'ارائه برنامه درسی توسط مدیر گروه در موعد مقرر'},
+                    success : function(val){
+                        if(itemsCount == 0)
+                            setTimeout(function(){$('.loadingWrapper').show();}, 50);
+                        $('@id').starrr({
+                            max: @ViewBag.Scores.Count,
+                            rating: val
+                        });
+                        itemsCount++;
+                        if(itemsCount === modelCount)
+                        {
+                            $('.starrr').each(function (i) {
+                                $(this).find('a').each(function (ii, el) {
+                                    $(this).attr('title', scores[scores.length - ii - 1])
+                                });
+                            });
+                            $('.loadingWrapper').hide();
+                        }
+
+                    }
+                });
+                </text>
+        }
+            }
+
+            $('.starrr').on('starrr:change', function(e, value){
+                e.preventDefault();
+                var gc = $(e.target).parent().parent().find('td:nth-child(1)').html();
+                $.ajax({
+                    url: '/EducationalGroup/AddOrUpdateInTimePresent',
+                    type: 'POST',
+                    data: { groupData: gc, rateIndex: value, indicatorName: 'ارائه برنامه درسی توسط مدیر گروه در موعد مقرر'},
+                    success: function (result) {
+                        $(e.target).parent().parent().find('td:nth-child(4)').html(result);
+                    }
+                });
+            });
+
+
+
+            $('body').tooltip({
+                selector: '.starrr, .resetScore',
+                track: true,
+                position: {
+                    my: "center bottom-20",
+                    at: "center bottom"
+                }
+            });
+
+
+            var scores = [];
+            @foreach (var item in ViewBag.Scores)
+        {
+            <text>
+            scores.push('@item.Name');
+            </text>
+        }
+
+            $('.resetScore').click(function(e){
+                e.preventDefault();
+                $.ajax({
+                    url: '/EducationalGroup/DeleteInTimePresent',
+                    type: 'POST',
+                    data: {code: $(this).data("code")},
+                    success: function(result){
+                        $('.loadingWrapper').show();
+                        //window.location.href = '/EducationalGroup/InTimePresentCurriculum'
+                        location.reload();
+                    }
+                });
+            });*@
+            //setTimeout(function(){
+            //    $('.starrr').each(function(i){
+            //        $(this).find('a').each(function(ii, el){
+            //            $(this).attr('title',scores[scores.length - ii - 1])
+            //        });
+            //    });
+            //}, 1000);
+        });
+    </script>
+
+}
+<script>
+    $(function(){
+        @if(Model != null)
+    {
+        <text>
+        $('#CollegeList').val(@ViewBag.CollegeId);
+        $('#TermList').val(@ViewBag.TermId);
+        </text>
+    }
+        $(document).on('click', '#btnSelectCollege', function (e) {
+            e.preventDefault();
+            @if (canChangeCollege)
+            {
+                <text>
+            if($('#CollegeList').val() !== '' && $('#TermList').val() !== ''){
+                $('.loadingWrapper').show();
+                window.location.href = "/EducationalGroup/InTimePresentCurriculum/?college=" + $('#CollegeList').val() + "&termId=" + $('#TermList').val();
+            }
+            </text>
+            }
+            else
+            {
+                <text>
+            if($('#TermList').val() !== ''){
+                $('.loadingWrapper').show();
+                window.location.href = "/EducationalGroup/InTimePresentCurriculum/?termId=" + $('#TermList').val();
+            }
+                </text>
+            }
+
+
+
+            @*$.ajax({
+                url: '@Url.Action("InTimePresentCurriculumForAdmin", "EducationalGroup")',
+                type: 'POST',
+                data: { 'college': $('#CollegeList').val() },
+                success: function (data) {
+                    window.location.href = "/EducationalGroup/InTimePresentCurriculum"
+                }
+            });*@
+        });
+    });
+</script>

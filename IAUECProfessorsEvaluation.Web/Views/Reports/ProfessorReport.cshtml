@@ -1,0 +1,290 @@
+﻿@using IAUECProfessorsEvaluation.Data.ReportModel
+@model List<ProfessorDetialReportModel>
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "گزارش اساتید";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+    var pageSize = 20;
+    var modelcount = Model.FirstOrDefault()?.FlawIndicatiors?.Distinct().ToList().Count ?? 0;
+    var modelWar = Model.FirstOrDefault()?.FlawIndicatiors?.Distinct().ToList();
+}
+
+
+<br />
+ 
+@if (modelcount > 0)
+{
+    <div class="row" style="margin: 0 auto">
+        <div class="row alert alert-warning">
+            <h4>اطلاعات وارده اساتید برای شاخص های ذیل دارای نقص می باشد</h4>
+            <div class="col-xs-6">
+                <ul>
+                    @for (var i = 0; i < modelcount; i++)
+                    {
+                        <li>@modelWar[i]</li>
+                    }
+                </ul>
+            </div>
+            @*<div class="col-xs-6">
+                <ul>
+                    @for (var i = (modelcount - 1); i >= (modelcount / 2); i--)
+                    {
+                        if (!((modelcount / 2) == 0 && (modelcount - 1) == 0))
+                        {
+                            <li>@modelWar[i.Value]</li>
+                        }
+                    }
+                </ul>
+            </div>*@
+        </div>
+    </div>
+}
+
+
+
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="row alert alert-info" style="background-color: rgb(42, 63, 84);border-color: rgba(42, 63, 84,.88);">
+            <h4 style="text-align: center;">رتبه بندی اساتید</h4>
+
+        </div>
+
+        <div class="row">
+            @(Html.Kendo().Grid<ProfessorDetialReportModel>(Model)
+                                                                  .Name("Generalresualt")
+                                                                  .Columns(columns =>
+                                                                  {
+                                                                      columns.Bound(x => x.RowNumber).ClientTemplate("#= renderNumber1() #").Filterable(false).Sortable(false).Title("ردیف").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                                                                      columns.Bound(p => p.FullName).Title("نام استاد").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                                                                      columns.Bound(p => p.ProfessorCode).Title("کد استاد").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                                                                      columns.Bound(p => p.NationalCode).Title("کدملی استاد").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                                                                      columns.Bound(p => p.ProfessorScore).Title("امتیاز کسب کرده").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                                                                      columns.Bound(i => i.ProfessorId).Hidden(true);
+                                                                      columns.Command(p => p.Custom("مشاهده").Click("showDetails").DataRouteValues(x =>
+                                                                      {
+                                                                          x.Add(o => o.ProfessorId);
+                                                                      }).HtmlAttributes(new { style = "text-align: center;" })).Title("جزئیات").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                                                                  })
+                                                                  .HtmlAttributes(new { style = "height: 500px;" })
+                                                                  .Pageable(pageable => pageable
+                                                                      .Input(true)
+                                                                      .Numeric(false)
+                                                                      .Messages(m => m.AllPages("تمام صفحات").Page("صفحه").Of(" ").Display("").Empty("هیچ مقدار").ItemsPerPage("تعداد نسبت به صفحه")))
+                                                                  .ToolBar(tools => tools.Custom().Text("گزارش با جزئیات").Url(Url.Action("ProfessorDetailsPrint", "Reports")))
+                                                                  .ToolBar(tools => tools.Custom().Text("گزارش به صورت کلی").Url(Url.Action("ProfessorGeneralPrint", "Reports")))
+                                                                  .ToolBar(tools => tools.Custom().Text("بازگشت به گزارش ساز").Url(Url.Action("Index", "Reports")))
+                                                                  //.Excel(excel => excel
+                                                                  //    .FileName("GroupGeneralExcelExport.xlsx")
+                                                                  //    .Filterable(true)
+                                                                  //    .AllPages(true))
+                                                                  .Sortable()
+                                                                  .Events(events =>
+                                                                  {
+                                                                      events.Change("resetRowNumber1")
+                                                                          .Sort("onSorting1")
+                                                                          .Filter("onFiltering1")
+                                                                          .Page("onPaging1");
+                                                                  })
+                                                                  .Scrollable(scr => scr.Height(430))
+                                                                  .Filterable(filterable => filterable.Operators(
+                                                                      operators => operators.ForString(
+                                                                          str => str.Clear()
+                                                                              .Contains("شامل")
+                                                                              .DoesNotContain("شامل نیست")
+                                                                              .IsEqualTo("برابر")
+                                                                              .IsNotEqualTo("برابر نیست")
+                                                                          )
+                                                                          .ForNumber(num => num.Clear()
+                                                                              .IsEqualTo("برابر")
+                                                                              .IsNotEqualTo("برابر نیست")
+                                                                              .IsGreaterThan("بزرگتر")
+                                                                              .IsGreaterThanOrEqualTo("بزرگتر مساوی")
+                                                                              .IsLessThan("کوچکتر")
+                                                                              .IsLessThanOrEqualTo("کوچکتر مساوی")
+                                                                          )
+
+                                                                      ).Messages(msg => msg.And("و").Clear("پاک").Filter("فیلتر").Or("یا").Info("جستجو:")))
+                                                                  .DataSource(dataSource => dataSource
+                                                                      .Ajax()
+                                                                      .PageSize(pageSize)
+                                                                      .ServerOperation(false)
+                                                                  )
+            )
+        </div>
+    </div>
+    @*<div class="col-xs-7">
+            <div class="row alert alert-info">
+
+                <h4 style="text-align: center">جزئیات رتبه بندی اساتید</h4>
+            </div>
+            <div class="row">
+
+                @(Html.Kendo().Grid<ProfessorReportModel>(Model.OrderedProfessorResualt)
+                  .Name("OrderedCollegeresualt")
+                  .Columns(columns =>
+                  {
+                      columns.Bound(x => x.RowNumber).ClientTemplate("#= renderNumber() #").Filterable(false).Sortable(false).Title("ردیف").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                      columns.Bound(p => p.ProfessorName).Title("نام و نام خانوادگی").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                      columns.Bound(p => p.IndicatorName).Title("شاخص").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                      columns.Bound(p => p.CurrentScore).Title("امتیاز کسب کرده").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                      columns.Command(command => command.Custom("نمایش جزئیات").Action("TestC","Reports").DataRouteValues(v =>
+                      {
+                          v.Add(o => o.ProfessorName);
+                          v.Add(o => o.ProfessorLastName);
+                      }));
+                  })
+                  .HtmlAttributes(new { style = "height: 550px;" })
+                  .Pageable(pageable => pageable
+                      .Input(true)
+                      .Numeric(false)
+
+                  )
+                  .ToolBar(tools => tools.Excel().Text("  خروجی اکسل  ").HtmlAttributes(new { style = "padding-right: 5px;" }))
+                  .Excel(excel => excel
+                      .FileName("GroupDetailsExcelExport.xlsx")
+                      .Filterable(true)
+                      .AllPages(true))
+
+                  .Sortable()
+                    .Events(events =>
+                    {
+                        events.Change("resetRowNumber")
+                            .Sort("onSorting")
+                            .Filter("onFiltering")
+                            .Page("onPaging");
+                    })
+                  .Scrollable(scr => scr.Height(430))
+                  .Filterable(filterable => filterable.Operators(
+                      operators => operators.ForString(
+                          str => str.Clear()
+                              .Contains("شامل")
+                              .DoesNotContain("شامل نیست")
+                              .IsEqualTo("برابر")
+                              .IsNotEqualTo("برابر نیست")
+                          )
+                          .ForNumber(num => num.Clear()
+                              .IsEqualTo("برابر")
+                              .IsNotEqualTo("برابر نیست")
+                              .IsGreaterThan("بزرگتر")
+                              .IsGreaterThanOrEqualTo("بزرگتر مساوی")
+                              .IsLessThan("کوچکتر")
+                              .IsLessThanOrEqualTo("کوچکتر مساوی")
+                          )
+
+                      ).Messages(msg => msg.And("و").Clear("پاک").Filter("فیلتر").Or("یا").Info("جستجو:")))
+                  .DataSource(dataSource => dataSource
+                      .Ajax()
+                      .PageSize(pageSize)
+                      .ServerOperation(false)
+                  )
+                )
+            </div>
+        </div>*@
+</div>
+
+
+@(Html.Kendo().Window().Name("Details")
+                            .Title("جزئیات")
+                            .Visible(false)
+                            .Modal(true)
+                            .Draggable(true)
+                              .Scrollable(true)
+                              .Height(600)
+
+                            .Width(800)
+
+)
+
+<script type="text/x-kendo-template" id="template">
+    <div id="details-container">
+        @*<div id="123asd"></div>*@
+        @*@Html.Partial("Details", "#= ProfessorId #" )*@
+    </div>
+</script>
+
+<script type="text/javascript">
+    var detailsTemplate = kendo.template($("#template").html());
+
+    function showDetails(e) {
+        e.preventDefault();
+
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                    $.ajax({
+                    url: '@Url.Action("ProfessorDetails", "Reports")',
+                    type: 'Get',
+                        data: { 'professorId': dataItem["ProfessorId"], 'termId': @ViewBag.TermId }
+                })
+                .done(function (resualt) {
+                var wnd = $("#Details").data("kendoWindow");
+                wnd.content(resualt);
+                wnd.center().open();
+
+                });
+
+
+    }
+</script>
+
+<style type="text/css">
+    #details-container {
+        padding: 10px;
+    }
+
+    .k-window-actions {
+        left: .3em;
+        right: initial !important;
+    }
+
+    #details-container h2 {
+        margin: 0;
+    }
+
+    #details-container em {
+        color: #8c8c8c;
+    }
+
+    #details-container dt {
+        margin: 0;
+        display: inline;
+    }
+</style>
+<script type="text/javascript">
+    function error_handler(e) {
+        alert("Server error");
+    }
+    var rowNumber = 0;
+    var rowNumber1 = 0;
+
+    function resetRowNumber() {
+        rowNumber = 0;
+    }
+    function resetRowNumber1() {
+        rowNumber1 = 0;
+    }
+    function renderNumber() {
+        return ++rowNumber;
+    }
+    function renderNumber1() {
+        return ++rowNumber1;
+    }
+    function onSorting(arg) {
+        resetRowNumber();
+    }
+    function onSorting1(arg) {
+        resetRowNumber1();
+    }
+    function onFiltering(arg) {
+        resetRowNumber();
+    }
+    function onFiltering1(arg) {
+        resetRowNumber1();
+    }
+    function onPaging(arg) {
+        rowNumber = (arg.page - 1) * @pageSize;
+    }
+    function onPaging1(arg) {
+        rowNumber1 = (arg.page - 1) * @pageSize;
+    }
+</script>

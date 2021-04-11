@@ -1,0 +1,165 @@
+﻿@{Layout = "~/Views/Shared/_Layout.cshtml";}
+
+<style>
+    .configBox {
+        height: 300px;
+        background: #eee;
+        margin-bottom: 30px;
+        border: 1px solid #ddd;
+    }
+
+        .configBox .title {
+            font-size: 18px;
+            padding: 0 15px;
+            line-height: 40px;
+            height: 40px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .configBox .content {
+            padding: 15px;
+        }
+        .configBox .content .form-control{
+            margin-bottom: 10px;
+        }
+        .configBox .fullWithButton{
+            width: 100%;
+            margin-left :0;
+            margin-right:0;
+        }
+</style>
+@if (ViewBag.MessageText != null)
+{
+    <div class="row">
+        <div class="col-sm-12 alert alert-@ViewBag.MessageType">
+            @ViewBag.MessageText
+        </div>
+    </div>
+}
+<div class="row">
+    <div class="col-sm-6">
+        <div class="configBox">
+            <div class="title">
+                ایجاد ترم
+            </div>
+            <div class="content">
+                @Html.TextBox("newTermName", null, new { @class = "form-control", @placeholder = "عنوان ترم" })
+                @Html.TextBox("newTermCode", null, new { @class = "form-control", @placeholder = "کد ترم" })
+                <a href="/" class="btn btn-success fullWithButton" id="addTerm">ثبت</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="configBox">
+            <div class="title">
+                تعیین ترم جاری
+            </div>
+            <div class="content">
+                @Html.DropDownList("TermList", (SelectList)ViewBag.TermList, "انتخاب کنید", new { @class = "form-control" })
+                <a href="/" class="btn btn-success fullWithButton" id="chooseTerm">ثبت</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-6">
+        <div class="configBox">
+            <div class="title">
+                مدت زمان بروزرسانی
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-sm-8">
+                        @Html.TextBox("scheduleTime", null, new { @class = "form-control", @placeholder = "بازه بروزرسانی" })
+                    </div>
+                    <div class="col-sm-4">
+                        <select id="ddlMeasurement" class="form-control">
+                            <option value="m">دقیقه</option>
+                            <option value="h">ساعت</option>
+                            <option value="D">روز</option>
+                            <option value="M" selected="selected">ماه</option>
+                            <option value="Y">سال</option>
+                        </select>
+                    </div>
+                </div>
+                <a href="/" class="btn btn-success fullWithButton" id="setScheduleTime">ثبت</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6">
+        <div class="configBox">
+            <div class="title">
+                بروزرسانی دستی
+            </div>
+            <div class="content">
+                <div class="alert alert-warning">
+                    توجه: بروزرسانی اطلاعات دیتابیس ممکن است باعث بروز اختلال در عملکرد سیستم شود.
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        @Html.DropDownList("TermListUpdate", (SelectList)ViewBag.TermList, "انتخاب کنید", new { @class = "form-control" })
+                    </div>
+                    <div class="col-sm-9">
+                        <a href="/" class="btn btn-warning fullWithButton" id="updateData">بروزرسانی</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(function () {
+        $('#addTerm').click(function (e) {
+            e.preventDefault();
+            $('.loadingWrapper').show();
+            $.ajax({
+                url: '/Pages/AddTerm',
+                type: 'POST',
+                data: { title: $('#newTermName').val(), code: $('#newTermCode').val() },
+                success: function (result) {
+                    location.reload();
+                }
+            });
+        });
+
+        $('#chooseTerm').click(function () {
+            e.preventDefault();
+            $('.loadingWrapper').show();
+            $.ajax({
+                url: '/Pages/ChooseTerm',
+                type: 'POST',
+                data: { id: $('#TermList').val() },
+                success: function (result) {
+                    location.reload();
+                }
+            });
+        });
+
+        $('#updateData').click(function (e) {
+            e.preventDefault();
+            $('.loadingWrapper').show();
+            $.ajax({
+                url: '/Pages/UpdateData',
+                type: 'POST',
+                data: { termCode: $('#TermListUpdate').val() },
+                success: function (result) {
+                    location.reload();
+                }
+            });
+        });
+        $('#setScheduleTime').click(function (e) {
+            e.preventDefault();
+            $('.loadingWrapper').show();
+            $.ajax({
+                url: '/Pages/SetScheduleTime',
+                type: 'POST',
+                data: { timeSpan: $('#scheduleTime').val(), measurement: $('#ddlMeasurement').val() },
+                success: function (result) {
+                    location.reload();
+                }
+            });
+        });
+    });
+</script>

@@ -1,0 +1,121 @@
+﻿@model List<IAUECProfessorsEvaluation.Web.Models.ViewModel.StudentEducationClassViewModel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<div class="panel panel-primary">
+    <div class="panel-heading">لیست ارزیابی اساتید</div>
+    <div class="panel-body">
+        <div class="row">
+            @if (Model.Any())
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+                                ردیف
+                            </th>
+                            <th>
+                                نام استاد
+                            </th>
+                            <th>
+                                کلاس
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var rowCount = 1;}
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @(rowCount++)
+                                </td>
+                                <td>
+                                    @(item.ProfessorFullName)
+                                </td>
+                                <td>
+                                    @(item.EducationClassName)
+                                </td>
+                                <td>
+                                    <a class="btn btn-success" href="@Url.Action("EvaluateProfessor","StudentEvaluation",new { professorId=item.ProfessorId,classId=item.EducationClassId,professorFullName=item.ProfessorFullName,classTitle=item.EducationClassName,stcode=item.stcode})">شروع ارزیابی</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                            }
+                            else
+                            {
+                                <div>برای این ترم ارزشیابی برای اساتید شما درنظر گرفته نشده است.</div>
+                            }
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    var questionId = null;
+    var newUrl = '@Url.Action("CreateSubquestion","StudentEvaluation")';
+    var editUrl = '@Url.Action("Edit","StudentEvaluation")';
+    var indexUrl='@Url.Action("IndexQuestion","StudentEvaluation")';
+    var infoId = null;
+    function editQuestion(id,termId) {
+         window.location.href = editUrl + "?questionId=" + id + "&termId=" + termId;
+    }
+    function deleteQuestion(id) {
+        debugger;
+        questionId = id;
+        $('#deletModal').modal('show');
+    }
+    $(".modal-delete-btn").click(function () {
+        $.ajax({
+            url: '@Url.Action("Delete", "StudentEvaluation")',
+            type: 'GET',
+            beforeSend: function () {
+
+            },
+            data: { questionId: questionId },
+            success: function (html) {
+                window.location.href = indexUrl;
+            },
+            error: function (request, error) {
+                alert("Request: " + JSON.stringify(request));
+            },
+            complete: function () {
+
+            }
+        });
+    });
+
+    function addSubQuestion(id, termId) {
+        window.location.href = newUrl + "?questionId=" + id + "&termId=" + termId;
+        @*$.ajax({
+            url: '@Url.Action("CreateSubquestion", "StudentEvaluation")',
+            type: 'GET',
+            data: {
+                questionId: id
+            },
+            success: function (e) {
+                 window.location.href = newUrl;
+            },
+            error: function (request, error) {
+                alert("Request: " + JSON.stringify(request));
+            },
+            complete: function () {
+                loadingBoxStop()
+            }
+        });*@
+    }
+
+     $("#NewQuestion").click(function () {
+         var createUrl = '@Url.Action("Create","StudentEvaluation")';
+         window.location.href = createUrl;
+    });
+</script>

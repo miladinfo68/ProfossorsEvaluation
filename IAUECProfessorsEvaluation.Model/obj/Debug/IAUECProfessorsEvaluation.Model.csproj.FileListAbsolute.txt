@@ -1,0 +1,5 @@
+D:\aaa_UniversityProjects\ProjDanesh_192.168.4.21\ProfessorEvaluation\IAUECProfessorsEvaluation.Model\bin\Debug\IAUECProfessorsEvaluation.Model.dll
+D:\aaa_UniversityProjects\ProjDanesh_192.168.4.21\ProfessorEvaluation\IAUECProfessorsEvaluation.Model\bin\Debug\IAUECProfessorsEvaluation.Model.pdb
+D:\aaa_UniversityProjects\ProjDanesh_192.168.4.21\ProfessorEvaluation\IAUECProfessorsEvaluation.Model\obj\Debug\IAUECProfessorsEvaluation.Model.csproj.CoreCompileInputs.cache
+D:\aaa_UniversityProjects\ProjDanesh_192.168.4.21\ProfessorEvaluation\IAUECProfessorsEvaluation.Model\obj\Debug\IAUECProfessorsEvaluation.Model.dll
+D:\aaa_UniversityProjects\ProjDanesh_192.168.4.21\ProfessorEvaluation\IAUECProfessorsEvaluation.Model\obj\Debug\IAUECProfessorsEvaluation.Model.pdb

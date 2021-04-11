@@ -1,0 +1,115 @@
+﻿@model System.Collections.Generic.List<IAUECProfessorsEvaluation.Data.ReportModel.GroupReportModel>
+
+
+@using IAUECProfessorsEvaluation.Web.Models.Utility
+
+<style>
+    .title {
+        padding: 0px 10px;
+        margin-bottom:15px;
+    }
+
+        .title > div {
+            border-bottom: 2px solid #ccc;
+            font-size: 1em;
+            font-weight: bold;
+            line-height: 2em;
+            padding-right: 10px;
+        }
+
+    .professorInfo {
+        margin-bottom: 15px;
+        border-bottom: 1px solid #ccc;
+        line-height: 30px;
+    } 
+
+    .topProfessorImage {
+        /*position: absolute;
+        left: 10px;
+        top: 0;
+        bottom: 0;
+        margin: auto;*/
+        height: 70px;
+        overflow: hidden;
+        width: 70px;
+        max-width: 70px;
+        border: 2px solid #ccc;
+        border-radius: 50%;
+        text-align: center;
+        white-space: nowrap;
+        display: inline-block;
+        margin-top: 10px;
+        float: left;
+    }
+
+        .topProfessorImage img {
+            width: 100%;
+            /*position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;*/
+            margin: auto;
+        }
+            .k-widget .container * {
+        box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+    }
+</style>
+
+<div class="container" style="width: 98%">
+    <div class="row">
+        <div class="title col-xs-12">
+            <div>مشخصات دانشکده</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="row">
+                <div class="col-xs-4">نام دانشکده:</div>
+                <div class="col-xs-5"> @Model.FirstOrDefault().CollegeName</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-4">کد دانشکده:</div>
+                <div class="col-xs-5"> @Model.FirstOrDefault().CollegeCode</div>
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div class="row">
+                <div class="col-xs-5">امتیاز نهایی دانشکده:</div>
+                <div class="col-xs-5"> @Model.FirstOrDefault().CollegeScore</div>
+            </div>
+        </div>
+
+    </div>
+    <hr />
+    <div class="row">
+        <div class="title col-xs-4">
+            <div>گروه ها</div>
+        </div>
+        <div class="title col-xs-8">
+            <div>امتیاز کسب گردید شده</div>
+        </div>
+    </div>
+    @foreach (var item in Model.OrderByDescending(x=>x.GroupScore))
+    {
+
+        <div class="row">
+                <div class="col-xs-4">
+                    <div>@item.IndicatorName</div>
+                    <div><span>نام گروه: </span><span>@item.GroupName</span></div>
+                </div>
+                <div class="col-xs-8">
+                    <div>@item.GroupScore</div>
+
+
+
+                </div>
+
+            </div>
+                <hr class="col-xs-12" />
+    }
+
+
+            </div>

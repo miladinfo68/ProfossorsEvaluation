@@ -1,0 +1,195 @@
+﻿@model System.Collections.Generic.List<IAUECProfessorsEvaluation.Data.ReportModel.GroupReportModel>
+
+
+@using IAUECProfessorsEvaluation.Web.Models.Utility
+@{
+    var ratio = Model.FirstOrDefault(x => string.IsNullOrEmpty(x.RatioName)) != null ? Model.FirstOrDefault(x => string.IsNullOrEmpty(x.RatioName)).CurrentScore : 0;
+    var groupMangerRatio = false;
+    Model.ForEach(x =>
+    {
+        if (x.IndicatorName == "ضریب مدیر گروه")
+        {
+            groupMangerRatio = true;
+
+        }
+    });
+}
+<style>
+    .title {
+        padding: 0px 10px;
+        margin-bottom: 15px;
+    }
+
+        .title > div {
+            border-bottom: 2px solid #ccc;
+            font-size: 1em;
+            font-weight: bold;
+            line-height: 2em;
+            padding-right: 10px;
+        }
+
+    .professorInfo {
+        margin-bottom: 15px;
+        border-bottom: 1px solid #ccc;
+        line-height: 30px;
+    }
+
+    .topProfessorImage {
+        /*position: absolute;
+        left: 10px;
+        top: 0;
+        bottom: 0;
+        margin: auto;*/
+        height: 70px;
+        overflow: hidden;
+        width: 70px;
+        max-width: 70px;
+        border: 2px solid #ccc;
+        border-radius: 50%;
+        text-align: center;
+        white-space: nowrap;
+        display: inline-block;
+        margin-top: 10px;
+        float: left;
+    }
+
+        .topProfessorImage img {
+            width: 100%;
+            position: relative;
+            top: 5px;
+            /*left: 0;
+            right: 0;
+            bottom: 0;*/
+            margin: auto;
+        }
+
+    .avgScore {
+        font-size: 14px;
+        font-weight: bold;
+        text-align: center;
+        border-top: 1px solid #ddd;
+    }
+
+    .k-widget .container * {
+        box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+    }
+
+    .progress {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="container" style="width: 98%">
+    <div class="row">
+        <div class="title col-xs-12">
+            <div>مشخصات گروه</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="row">
+                <div class="col-xs-4">نام گروه:</div>
+                <div class="col-xs-5"> @Model.FirstOrDefault().GroupName</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-4">نام دانشکده:</div>
+                <div class="col-xs-5"> @Model.FirstOrDefault().CollegeName</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-4">امتیاز نهایی گروه:</div>
+                <div class="col-xs-5"> @Model.FirstOrDefault().GroupScore</div>
+            </div>
+
+        </div>
+        <div class="col-xs-6">
+            <div class="row">
+                <div class="col-xs-5">میانگین نمرات اساتید:</div>
+                <div class="col-xs-5"> @Model.FirstOrDefault().AvgProfessorScoreGroup</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-5">ضریب مدیرگروه:</div>
+                @if (groupMangerRatio)
+                {
+                    <div class="col-xs-5">@Model.FirstOrDefault(x => x.IndicatorName == "ضریب مدیر گروه").CurrentScore</div>
+                }
+                else
+                {
+                    <div class="col-xs-5">@(ratio != null ? ratio.ToString() : "موجود نمی باشد")</div>
+
+                }
+            </div>
+        </div>
+
+    </div>
+    <hr />
+    <div class="row">
+        <div class="title col-xs-4">
+            <div>عنوان شاخص</div>
+        </div>
+        <div class="title col-xs-8">
+            <div>میانگین امتیاز</div>
+        </div>
+    </div>
+    @foreach (var item in Model.OrderBy(x=>x.IndicatorName))
+    {
+        if (!string.IsNullOrEmpty(item.CurrentScore.ToString()))
+        {
+            if (!string.IsNullOrEmpty(item.RatioName))
+            {
+                <div class="row">
+                    <div class="col-xs-4">
+                        <div>@item.IndicatorName</div>
+                        <div>
+                            <span>میزان اهمیت: </span><span>@item.RatioName (x @item.RatioValue)</span>
+                        </div>
+                    </div>
+                    <div class="col-xs-8">
+                        <div>@((item.CurrentScore / item.RatioValue)?.GetScoreName(item.IndicatorId))</div>
+                        @if (item.IndicatorName != "ضریب مدیر گروه")
+                        {
+                            <div class="progress" style="border-radius: 5px;">
+                                <div class="progress-bar @((item.CurrentScore / item.RatioValue)?.GetCssClassForProgressBar())" role="progressbar" aria-valuenow="@(item.CurrentScore / item.RatioValue)" aria-valuemin="0" aria-valuemax="100" style="width: @(item.CurrentScore / item.RatioValue)%;">
+                                    <span style="line-height: 20px;">@(item.CurrentScore / item.RatioValue)</span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div>
+                                <div >
+                                    <span style="line-height: 20px;">@(item.CurrentScore / item.RatioValue)</span>
+                                </div>
+                            </div>
+                        }
+                        <div class="avgScore">@item.CurrentScore</div>
+                    </div>
+
+                </div>
+            }
+        }
+        else
+        {
+            <div class="row" style="display: block;background-color: antiquewhite">
+                <div class="col-xs-4">
+                    <div>@item.IndicatorName</div>
+                    <div><span>میزان اهمیت: </span><span>@item.RatioName (x @item.RatioValue)</span></div>
+                </div>
+                <div class="col-xs-8">
+
+                    <div class="alert alert-warning" style="display: block; padding: initial; margin: initial; border-color: #2a3f54; background-color: #2a3f54;text-align: center">
+                        <h5>موجود نمی باشد</h5>
+                    </div>
+
+                </div>
+
+            </div>
+
+        }
+        <hr class="col-xs-12" />
+
+    }
+
+
+</div>

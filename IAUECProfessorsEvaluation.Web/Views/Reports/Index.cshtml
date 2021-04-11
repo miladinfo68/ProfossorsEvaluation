@@ -1,0 +1,1375 @@
+﻿@using System.Collections.Specialized
+@using System.Web.UI.HtmlControls
+@using IAUECProfessorsEvaluation.Web.Models.ViewModel
+@using Kendo.Mvc.UI;
+@model IAUECProfessorsEvaluation.Web.Models.ViewModel.ReportingViewMoel
+@{
+  
+
+    ViewBag.Title = "گزارشات";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+    var gScoreId = "";
+    var pSocreId = "";
+    var drp1 = "";
+    var checkbox1 = "";
+    var checkbox2 = "";
+    var drpGroup = "";
+    var drpProfessor = "";
+    var drp2 = "";
+} 
+@section styles
+{
+    <style>
+        b.caret {
+            float: left;
+            margin-top: -12.5px;
+        }
+
+        button.multiselect {
+            text-align: right !important;
+            font-size: 13px !important;
+            font-weight: 400 !important;
+        }
+
+        ul.multiselect-container {
+            width: 101.5% !important;
+            padding-right: 2%;
+            padding-left: 2%;
+        }
+
+        .dropdown-menu > .active > a, .dropdown-menu > .active > a:focus, .dropdown-menu > .active > a:hover {
+            /*background-color: #296b61;*/
+            box-shadow: inset 0 0 10px 3px #3276b1;
+        }
+
+        ul.multiselect-container > li:not(.multiselect-filter) {
+            padding-right: 1.5%;
+            padding-left: 1.5%;
+        }
+
+        #tabstrip h2 {
+            font-weight: lighter;
+            font-size: 5em;
+            line-height: 1;
+            padding: 0 0 0 30px;
+            margin: 0;
+        }
+
+            #tabstrip h2 span {
+                background: none;
+                padding-left: 5px;
+                font-size: .3em;
+                vertical-align: top;
+            }
+
+        #tabstrip p {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+
+    <style>
+        .k-autocomplete {
+            width: 50%;
+        }
+    </style>
+    <link href="~/Content/css/bootstrap-multiselect.css" rel="stylesheet" />
+
+}
+@section topScripts
+{
+    @*<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>*@
+    <script src="~/Content/js/bootstrap-multiselect.js"></script>
+}
+
+
+<br />
+<br />
+@(Html.Kendo().ProgressBar()
+                                                                      .Name("reportCompleteness")
+                                                                      .Type(ProgressBarType.Value)
+                                                                      .ShowStatus(true)
+                                                                      .Reverse(true)
+                                                                      .Min(0)
+                                                                      .Max(5)
+                                                                      .Value(1)
+                                                                      .HtmlAttributes(new { style = "width:100%;text-align: center;" })
+                                                                      .Events(e =>
+                                                                      {
+                                                                          e.Change("progressBarOnChange");
+                                                                          e.Complete("progressBarOnComplete");
+                                                                      })
+)
+<br />
+<br />
+@using (Html.BeginForm("resualt", "Reports", FormMethod.Post, new { @class = "form-horizontal", role = "form", id = "reportForm" }))
+{
+    @(Html.Kendo().TabStrip()
+                                            .Name("tabstrip")
+
+                                            .Animation(animation =>
+                                            animation.Open(effect =>
+                                            effect.Fade(FadeDirection.In)))
+                                            .Items(tabstrip =>
+                                            {
+                                                tabstrip.Add().Text("شرایط")
+                                .HtmlAttributes(new { style = "width:19.2%;text-align: center;font-size: large;" })
+                                .Selected(true)
+                                .Content(@<text>
+                                    <div class="row" style="margin-bottom: 10px;">
+                                        <div class=" col-xs-5">
+                                            <h4>ترم مورد نظر</h4>
+                                            @( Html.Kendo().DropDownListFor(m => m.TermId)
+                                                                            .Name("TermId")
+                                                                            .BindTo(Model.Terms)
+                                                                            .DataTextField("TermCode")
+                                                                            .DataValueField("Id")
+                                                                            .NoDataTemplate("یافت نشد")
+                                                                            .OptionLabel("انتخاب نمایید")
+                                                                            .OptionLabelTemplate("انتخاب نمایید")
+                                                                            .OptionLabelTemplateId("0")
+                                                                            .Value("0")
+                                                                            .HtmlAttributes(new { style = "width: 100%", required = "required", validationmessage = "ترم مورد نظر را مشخص نمایید" })
+                                            )
+                                            <div class="k-dependency-hint">راهنما: ترم مورد نظر خود را برای گزارش انتخاب نمایید.</div>
+
+                                        </div>
+                                        <div class=" col-xs-5">
+                                            <h4>سطح اعمال ارزشیابی</h4>
+                                            @( Html.Kendo().DropDownListFor(m => m.ReportLevel)
+                                                                            .Name("ReportLevel")
+                                                                            .BindTo(Model.ReportLevleType)
+                                                                            .DataTextField("Name")
+                                                                            .DataValueField("Id")
+                                                                            .NoDataTemplate("یافت نشد")
+                                                                            .OptionLabel("انتخاب نمایید")
+                                                                            .OptionLabelTemplate("انتخاب نمایید")
+                                                                            .OptionLabelTemplateId("0")
+                                                                            .Value("0")
+                                                                            .HtmlAttributes(new { style = "width: 100%", required = "required", validationmessage = "سطح گزارش را مشخص نمایید" })
+                                            )
+
+                                            <div class="k-dependency-hint">راهنما: سطح مورد نظر خود را برای انجام گزارش انتخاب نمایید.</div>
+
+                                        </div>
+
+                                    </div>
+                                    <hr />
+                                    <div class="col-xs-11 form-group text-right">
+
+                                        @*@(Html.Kendo().Button()
+                                            .Name("Previous1")
+                                            .Content("مرحله قبلی")
+                                            .Events(ev => ev.Click("onPreviousClick")))*@
+
+                                        @(Html.Kendo().Button()
+                                                                                                                              .Name("Next1")
+                                                                                                                              .Content("مرحله بعدی")
+                                                                                                                              .HtmlAttributes(new { @class = "k-primary" })
+                                                                                              .Events(ev => ev.Click("onNextClick")))
+                                        <br />
+
+                                    </div>
+
+                                    <br />
+                                    <br />
+
+
+
+
+                                    <br />
+                                    <br />
+                                    <br />
+                                    <br />
+                                    <br />
+                                    <div class="k-dependency-hint" style="margin-right: 1px"> @($" آخرین بروزرسانی در تاریخ: {ViewBag.lastUpdate}")</div>
+
+                                </text>);
+
+
+
+                                                            tabstrip.Add()
+.Text("دانشکده")
+.HtmlAttributes(new { style = "width:19.2%;text-align: center;font-size: large;" })
+.Enabled(false)
+.Content(@<text>
+        <div class="row">
+            <div class="section k-content col-xs-11">
+                <h4>دانشکده های مورد نظر در گزارش</h4>
+                <select id="ColList" name="ColList" multiple="multiple"></select>
+
+                @*&nbsp;
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    @(Html.Kendo().CheckBoxFor(m => m.AllCollege).HtmlAttributes(new {style="display: none !important"})
+
+                          .Name("AllCollege").Label("تمام دانشکده ها"))*@
+
+                <br />
+                <br />
+
+                <div class="k-dependency-hint">راهنما: در صورتی که می خواهید تمام دانشکده ها را انتخاب نمایید حتما گزینه تمام دانشکده ها را انتخاب نمایید.</div>
+            </div>
+
+
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-xs-11 form-group text-right">
+
+                @(Html.Kendo().Button()
+                                                                                                                                                                         .Name("Previous2")
+                                                                                                                                                                         .Content("مرحله قبلی")
+                                                                                                                                                                         .Events(ev => ev.Click("onPreviousClick")))
+
+                @(Html.Kendo().Button()
+                                                                                                                                                                         .Name("Next2")
+                                                                                                                                                                         .Content("مرحله بعدی")
+                                                                                                                                                                         .HtmlAttributes(new { @class = "k-primary" })
+                                                                                                                                                                         .Events(ev => ev.Click("onNextClick")))
+            </div>
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+
+            <span id="collegeChange" hidden>no</span>
+        </div>
+
+</text>);
+
+                                                    tabstrip.Add().Text("گروه")
+    .HtmlAttributes(new { style = "width:19.2%;text-align: center;font-size: large;" })
+    .Enabled(false)
+    .Content(@<text>
+        <div class="row">
+            <div class="section k-content col-xs-11">
+                <h4>گروه های آموزشی مورد نظر در گزارش</h4>
+                <select id="GrpList" name="GrpList" multiple="multiple"></select>
+                @*&nbsp;
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    @(Html.Kendo().CheckBoxFor(m => m.AllGroup).Name("AllGroup").Label("تمام گروه ها"))*@
+
+
+                @*@(Html.Kendo()
+                                 .AutoCompleteFor(m => m.GroupList)
+                                 .Name("GroupList")
+                                 .DataTextField("Name")
+                                 .Filter("contains")
+                                 .MinLength(1)
+                                 .Separator(" ,")
+                                 .Placeholder("انتخاب گروه آموزشی")
+                                 .NoDataTemplate("یافت نشد")
+                                 .HtmlAttributes(new { style = "width:50%" })
+                                 .DataSource(source =>
+                                 {
+                                     source.Read(read =>
+                                     {
+                                         read.Action("ServerFiltering_GetEducationalGroups", "Reports")
+                                             .Data("onAdditionalDataForGroups");
+                                     })
+                                         .ServerFiltering(true);
+                                 })
+                    )
+                    &nbsp;
+                    &nbsp;
+                    &nbsp;
+                    @(Html.Kendo().CheckBoxFor(m => m.AllGroup).Name("AllGroup").Label("تمام گروه ها"))*@
+                &nbsp;
+                &nbsp;
+                &nbsp;
+                &nbsp;
+                &nbsp;
+                &nbsp;
+
+                @(Html.Kendo().CheckBox().Name("ChangeGroupCondition").Label("تغییر شروط گزارش"))
+
+                <div class="k-dependency-hint">راهنما: در صورتی که می خواهید تمام گروه ها را انتخاب نمایید حتما گزینه تمام گروه ها را انتخاب نمایید.</div>
+            </div>
+
+
+        </div>
+        <hr />
+        @*<div class="row">
+                <div class="section k-content col-xs-11">
+                    <h4>انتخاب شاخص ها</h4>
+
+                    @(Html.Kendo()
+                       .CheckBoxFor(m => m.AllGroupIndicator)
+                       .Name("AllGroupIndicator")
+                       .Label("تمایل دارم تمامی شاخص های، در رتبه بندی و ارزشیابی شرکت داده شوند"))
+
+                </div>
+
+
+            </div>
+            <hr />*@
+
+        <div class="row">
+            <div class="section k-content col-xs-11">
+
+
+                <div id="grpConditionContainer">
+                    <h4>شروط مرتبط با گروه</h4>
+
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <div class="k-dependency-hint">
+                                شما می توانید گزینه ها را به صورت ترکیبی استفاده نمایید .
+                            </div>
+                            <hr />
+                        </div>
+                        @*<div class="col-xs-1">*@
+                        @*@(Html.Kendo().CheckBoxFor(m => m.IsSelectedScorePartProfessor)
+                            .Label("شرکت دادن امتیازی خاص ازشاخص ها به طور انتخابی")
+                            )*@
+                        @*</div>*@
+                        @*<div class="col-xs-4">*@
+                        @*@(Html.Kendo().CheckBoxFor(m => m.IsSelectedIndicatorPartProfessor)
+                            .Label("شرکت دادن شاخص ها به طور انتخابی"))*@
+                        @*<div class="k-dependency-hint">
+                                راهنما: شرکت دادن شاخص ها به طور انتخابی
+                            </div>*@
+
+                        @*<hr />
+                            </div>*@
+
+                    </div>
+
+                    @for (int i = 0; i < Model.IndicatorsForGroup.Count; i++)
+                                    {
+                        @Html.HiddenFor(m => m.IndicatorsForGroup[i].Id)
+                        <div class="row" style="margin-bottom: 10px;">
+                            <div class=" col-xs-4">
+                                @Model.IndicatorsForGroup[i].Name
+                            </div>
+                            <div class=" col-xs-1">
+                                @(Html.Kendo().CheckBoxFor(m => m.IndicatorsForGroup[i].IsParticipation)
+
+                                                                                                                                                                      .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                            </div>
+
+                            <div class=" col-xs-3">
+                                @Html.DropDownListFor(m => m.IndicatorsForGroup[i].SelectedScore, new SelectList(Model.IndicatorsForGroup[i].Scores, "Id", "Name"), new { @multiple = "multiple" })
+                            </div>
+                        </div>
+
+                                    }
+                
+
+
+                    <br />
+                    <hr />
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-xs-11 form-group text-right">
+
+                @(Html.Kendo().Button()
+                                                                                                                                                                         .Name("Previous3")
+                                                                                                                                                                         .Content("مرحله قبلی")
+                                                                                                                                                                         .Events(ev => ev.Click("onPreviousClick")))
+
+                @(Html.Kendo().Button()
+                                                                                                                                                                         .Name("Next3")
+                                                                                                                                                                         .Content("مرحله بعدی")
+                                                                                                                                                                         .HtmlAttributes(new { @class = "k-primary" })
+                                                                                                                                                                         .Events(ev => ev.Click("onNextClick")))
+            </div>
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+
+            <span id="groupChange" hidden>no</span>
+        </div>
+
+    </text>);
+                                                        tabstrip.Add().Text("استاد")
+.HtmlAttributes(new { style = "width:19.2%;text-align: center;font-size: large;" })
+.Enabled(false)
+.Content(@<text>
+    <div class="row">
+        <div class="section k-content col-xs-11">
+            <h4>اساتید مورد نظر در گزارش</h4>
+            <select id="proList" name="proList" multiple="multiple"></select>
+            @*&nbsp;
+                &nbsp;
+                &nbsp;
+                &nbsp;
+                &nbsp;
+                &nbsp;
+                @(Html.Kendo().CheckBoxFor(m => m.AllProfessore).Name("AllProfessore").Label("تمام استاید"))*@
+
+            @*@(Html.Kendo()
+                                             .AutoCompleteFor(m => m.ProfessoreList)
+                                             .Name("ProfessoreList")
+                                             .DataTextField("Name")
+                                             .Filter("contains")
+                                             .MinLength(1)
+                                             .Separator(" ,")
+                                             .Placeholder("انتخاب اساتید")
+                                             .NoDataTemplate("یافت نشد")
+                                             .HtmlAttributes(new { style = "width:50%" })
+                                             .DataSource(source =>
+                                             {
+                                                 source.Read(read =>
+                                                 {
+                                                     read.Action("ServerFiltering_ProfessoreGroups", "Reports")
+                                                         .Data("onAdditionalDataForProfessores");
+                                                 })
+                                                     .ServerFiltering(true);
+                                             })
+                )
+                &nbsp;
+                &nbsp;
+                &nbsp;
+                @(Html.Kendo().CheckBoxFor(m => m.AllProfessore).Name("AllProfessore").Label("تمام استاید"))*@
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+
+            @(Html.Kendo().CheckBox().Name("ChangeProfessorCondition").Label("تغییر شروط گزارش"))
+            <div class="k-dependency-hint">راهنما: برای پیدا کردن استاد مد نظر، می توانید با وارد کردن ابتدای  نام استاد آن را انتخاب نمایید.</div>
+        </div>
+
+
+    </div>
+    <hr />
+    @*<div class="row">
+            <div class="section k-content col-xs-11">
+                <h4>انتخاب شاخص ها</h4>
+                @(Html.Kendo()
+                               .CheckBoxFor(m => m.AllProfessorIndictor)
+                               .Name("AllProfessorIndictor")
+                               .Label("تمایل دارم تمامی شاخص ها، در رتبه بندی و ارزشیابی شرکت داده شوند")
+                )
+
+            </div>
+
+
+        </div>
+        <hr />*@
+
+    <div class="row">
+        <div id="professorConditionContainer">
+            <div class="section k-content col-xs-11">
+                <h4>شروط مرتبط با اساتید</h4>
+                <div class="row">
+                    <div class="col-xs-4">
+                        <div class="k-dependency-hint">
+                            شما می توانید گزینه ها را به صورت ترکیبی استفاده نمایید .
+                        </div>
+                        <hr />
+                    </div>
+                    @*<div class="col-xs-1">*@
+                    @*@(Html.Kendo().CheckBoxFor(m => m.IsSelectedScorePartProfessor)
+                        .Label("شرکت دادن امتیازی خاص ازشاخص ها به طور انتخابی")
+                        )*@
+
+                    @*</div>*@
+                    @*<div class="col-xs-4">*@
+                    @*@(Html.Kendo().CheckBoxFor(m => m.IsSelectedIndicatorPartProfessor)
+                        .Label("شرکت دادن شاخص ها به طور انتخابی"))*@
+                    @*<div class="k-dependency-hint">
+                            راهنما: شرکت دادن شاخص ها به طور انتخابی
+                        </div>*@
+
+                    @*<hr />
+                        </div>*@
+
+                </div>
+
+                @for (int c = 0; c < Model.IndicatorsForProfessor.Count; c++)
+                                {
+                    @Html.HiddenFor(m => m.IndicatorsForProfessor[c].Id)
+
+                    <div class="row" style="margin-bottom: 10px;">
+                        <div class=" col-xs-4">@Model.IndicatorsForProfessor[c].Name</div>
+                        <div class=" col-xs-1">
+                            @( Html.Kendo().CheckBoxFor(m => m.IndicatorsForProfessor[c].IsParticipation)
+
+                                                                                                                                                                   .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                        </div>
+                        <div class=" col-xs-3">
+                            @Html.DropDownListFor(m => m.IndicatorsForProfessor[c].SelectedScore, new SelectList(Model.IndicatorsForProfessor[c].Scores, "Id", "Name"), new { @multiple = "multiple" })
+                        </div>
+
+                    </div>
+                                }
+
+
+
+                <br />
+                <hr />
+
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-11 form-group text-right">
+
+            @(Html.Kendo().Button()
+                                                                                                                                                                             .Name("Previous4")
+                                                                                                                                                                             .Content("مرحله قبلی")
+                                                                                                                                                                             .Events(ev => ev.Click("onPreviousClick")))
+
+            @(Html.Kendo().Button()
+                                                                                                                                                                             .Name("Next4")
+                                                                                                                                                                             .Content("مرحله بعدی")
+                                                                                                                                                                             .HtmlAttributes(new { @class = "k-primary" })
+                                                                                                                                                                             .Events(ev => ev.Click("onNextClick")))
+        </div>
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+
+    </div>
+</text>);
+
+                                                    tabstrip.Add().Text("نتیجه")
+.HtmlAttributes(new { style = "width:19.2%;text-align: center;font-size: large;" })
+.Enabled(false)
+.Content(@<text>
+    <div class="row" style="margin-bottom: 10px;">
+        <div class=" col-xs-5">
+            <h4>مرتب سازی</h4>
+            @*@(Html.Kendo().DropDownListFor(m => m.Ordering)
+                       .Name("Ordering")
+                       .DataSource(source => source.Read(
+                           read => { read.Action("Cascading_Get_Ordering", "Reports").Data("filterOrdering"); })
+                    .ServerFiltering(true))
+                       .DataTextField("Name")
+                       .DataValueField("Id")
+                       .NoDataTemplate("یافت نشد")
+                       .OptionLabel("انتخاب نمایید")
+                       .OptionLabelTemplate("انتخاب نمایید")
+                       .OptionLabelTemplateId("0")
+                       .Value("0")
+                       .HtmlAttributes(new { style = "width: 40%" })
+                      .Enable(false)
+                      .AutoBind(false)
+                      .CascadeFrom("ReportLevel")
+
+                )*@
+
+            @(Html.Kendo().DropDownListFor(m => m.OrderingType)
+
+                                                                                                                                                  .BindTo(new List<SelectListItem>() {
+                                                                                                                                                                                                                    new SelectListItem() {
+                                                                                                                                                                                                                        Text = "بالاترین امتیاز به کمترین",
+                                                                                                                                                                                                                        Value = "1"
+                                                                                                                                                                                                                    },
+                                                                                                                                                                                                                    new SelectListItem() {
+                                                                                                                                                                                                                        Text = "کمترین امتیاز به بالاترین",
+                                                                                                                                                                                                                        Value = "2"
+                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                })
+                                                                                                                                                  .Value("1")
+                                                                                                                                                  .HtmlAttributes(new { style = "width: 100%" })
+            )
+
+
+            @*@(Html.Kendo().CheckBoxFor(m => m.AllOrdering).Name("AllOrdering").Label("مجموعه امتیازات"))*@
+
+            <div class="k-dependency-hint">راهنما: مرتب سازی رتبه بندی مورد نظر خود را برای انجام گزارش انتخاب نمایید.</div>
+
+        </div>
+        <div class="col-xs-5">
+            <h4>تعداد موارد</h4>
+            @(Html.Kendo().DropDownListFor(m => m.CountShow)
+
+            .BindTo(new List<SelectListItem>()
+                                                                                                                                                                                                                                                                                    {
+                        new SelectListItem()
+                        {
+                            Text = "3",
+                            Value = "3"
+                        },
+                        new SelectListItem()
+                        {
+                            Text = "10",
+                            Value = "10"
+                        },
+                        new SelectListItem()
+                        {
+                            Text = "50",
+                            Value = "50"
+                        },
+                        new SelectListItem()
+                        {
+                            Text = "100",
+                            Value = "100"
+                        },
+                        new SelectListItem()
+                        {
+                            Text = "تمامی موارد",
+                            Value = "101"
+                        }
+                                                                                                                                                                                                                                                                                                                                        })
+            .Value("3")
+            .HtmlAttributes(new { style = "width: 100%" })
+            )
+            <div class="k-dependency-hint">راهنما: تعداد موارد انتخابی مورد نظر خود را برای انجام گزارش انتخاب نمایید.</div>
+
+        </div>
+
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-xs-11 form-group text-right">
+            @(Html.Kendo().Button()
+                                                                                                                                                                             .Name("Previous5")
+                                                                                                                                                                             .Content("مرحله قبلی")
+                                                                                                                                                                             .Events(ev => ev.Click("onPreviousClick")))
+
+            @(Html.Kendo().Button()
+                                                                                                                                                            .Name("Resualt")
+                                                                                                                                                            .Content("نتیجه")
+                                                                                                                                                            .HtmlAttributes(new { @class = "k-primary" })
+            )
+
+        </div>
+
+    </div>
+</text>);
+                                                })
+                                                                                                                                                                                                                              .Events(ev =>
+                                                                                                                                                                                                                              {
+                                                                                                                                                                                                                                  ev.Select("onSelect");
+                                                                                                                                                                                                                                  ev.Show("onShow");
+                                                                                                                                                                                                                              })
+
+    )
+}
+
+
+
+
+@section bottomScripts
+{
+
+    <script>
+        $("#Resualt").click(function () {
+
+            $('.loadingWrapper').show();
+        });
+
+        function onAdditionalData() {
+            return {
+                text: $("#CollegeList").val()
+            };
+        }
+
+        function onAdditionalDataForGroups() {
+            return {
+                text: $("#GroupList").val(),
+                colleges: $("#CollegeList").val(),
+                allCollege: $("#AllCollege").is(':checked')
+            };
+        }
+
+        function onAdditionalDataForProfessores() {
+            return {
+                text: $("#ProfessoreList").val(),
+                groups: $("#GroupList").val(),
+                allGroup: $("#AllGroup").is(':checked'),
+                colleges: $("#CollegeList").val(),
+                allCollege: $("#AllCollege").is(':checked')
+            };
+        }
+
+        function filterOrdering() {
+            return {
+                level: $("#ReportLevel").val()
+            };
+        }
+
+
+    </script>
+    <script>
+
+        @for (int p = 0; p < Model.IndicatorsForGroup.Count; p++)
+            {
+                <text>
+        $('@($"#IndicatorsForGroup_{p}__IsParticipation")').change(function() {
+                if (this.checked) {
+
+                    $('option', $('@($"#IndicatorsForGroup_{p}__SelectedScore")'))
+                        .each(function (element) {
+                            $(this).removeAttr('selected').prop('selected', true);
+                        });
+                    $('@($"#IndicatorsForGroup_{p}__SelectedScore")').multiselect('enable');
+                    $('@($"#IndicatorsForGroup_{p}__SelectedScore")').multiselect('refresh');
+
+                } else {
+
+
+                    $('option', $('@($"#IndicatorsForGroup_{p}__SelectedScore")'))
+                        .each(function (element) {
+                            $(this).removeAttr('selected').prop('selected', false);
+                        });
+                    $('@($"#IndicatorsForGroup_{p}__SelectedScore")').multiselect('disable');
+                    $('@($"#IndicatorsForGroup_{p}__SelectedScore")').multiselect('refresh');
+
+
+
+                }
+            }
+        );
+
+                </text>
+            }
+
+
+        @for (int p = 0; p < Model.IndicatorsForProfessor.Count; p++)
+            {
+                <text>
+                    $('@($"#IndicatorsForProfessor_{p}__IsParticipation")').change(function() {
+                            if (this.checked) {
+
+                                $('option', $('@($"#IndicatorsForProfessor_{p}__SelectedScore")'))
+                                    .each(function (element) {
+                                        $(this).removeAttr('selected').prop('selected', true);
+                                    });
+                                $('@($"#IndicatorsForProfessor_{p}__SelectedScore")').multiselect('enable');
+                                $('@($"#IndicatorsForProfessor_{p}__SelectedScore")').multiselect('refresh');
+
+                            } else {
+
+
+                                $('option', $('@($"#IndicatorsForProfessor_{p}__SelectedScore")'))
+                                    .each(function (element) {
+                                        $(this).removeAttr('selected').prop('selected', false);
+                                    });
+                                $('@($"#IndicatorsForProfessor_{p}__SelectedScore")').multiselect('disable');
+                                $('@($"#IndicatorsForProfessor_{p}__SelectedScore")').multiselect('refresh');
+
+
+
+                            }
+                        }
+                    );
+
+                </text>
+            }
+
+        var CheckIndicatorForGroup = function() {
+            @for (int p = 0; p < Model.IndicatorsForGroup.Count; p++)
+            {
+                checkbox1 = ("#" + "IndicatorsForGroup_" + p + "__IsParticipation");
+                <text>
+                    $('@checkbox1').prop("checked", true);
+                </text>
+            }
+        };
+
+        var UncheckIndicatorForGroup = function() {
+            @for (int p = 0; p < Model.IndicatorsForGroup.Count; p++)
+            {
+                checkbox1 = ("#" + "IndicatorsForGroup_" + p + "__IsParticipation");
+                <text>
+                    $('@checkbox1').prop("checked", false);
+                </text>
+            }
+        };
+
+        var deSelectedScoreGroup = function() {
+            @for (int p = 0; p < Model.IndicatorsForGroup.Count; p++)
+            {
+                drpGroup = ("#" + "IndicatorsForGroup_" + p + "__SelectedScore");
+                <text>
+                    $('option', $('@drpGroup')).each(function(element) {
+                        $(this).removeAttr('selected').prop('selected', false);
+                    });
+                    $('@drpGroup').multiselect('refresh');
+                </text>
+            }
+        };
+        var SelectedScoreGroup = function() {
+            @for (int p = 0; p < Model.IndicatorsForGroup.Count; p++)
+            {
+                drpGroup = ("#" + "IndicatorsForGroup_" + p + "__SelectedScore");
+                <text>
+                    $('option', $('@drpGroup')).each(function(element) {
+                        $(this).removeAttr('selected').prop('selected', true);
+                    });
+                    $('@drpGroup').multiselect('refresh');
+                </text>
+            }
+        };
+
+
+        var CheckIndicatorForProfessor = function() {
+            @for (int p = 0; p < Model.IndicatorsForProfessor.Count; p++)
+            {
+                checkbox2 = ("#" + "IndicatorsForProfessor_" + p + "__IsParticipation");
+                <text>
+                    $('@checkbox2').prop("checked", true);
+                </text>
+            }
+        };
+
+        var UncheckIndicatorForProfessor = function() {
+            @for (int p = 0; p < Model.IndicatorsForProfessor.Count; p++)
+            {
+                checkbox2 = ("#" + "IndicatorsForProfessor_" + p + "__IsParticipation");
+                <text>
+                    $('@checkbox2').prop("checked", false);
+                </text>
+            }
+        };
+
+        var deSelectedScoreProfessor = function() {
+            @for (int p = 0; p < Model.IndicatorsForProfessor.Count; p++)
+            {
+                drpProfessor = ("#" + "IndicatorsForProfessor_" + p + "__SelectedScore");
+                <text>
+                    $('option', $('@drpProfessor')).each(function(element) {
+                        $(this).removeAttr('selected').prop('selected', false);
+                    });
+                    $('@drpProfessor').multiselect('refresh');
+                </text>
+            }
+        };
+        var SelectedScoreProfessor = function() {
+            @for (int p = 0; p < Model.IndicatorsForProfessor.Count; p++)
+            {
+                drpProfessor = ("#" + "IndicatorsForProfessor_" + p + "__SelectedScore");
+                <text>
+                    $('option', $('@drpProfessor')).each(function(element) {
+                        $(this).removeAttr('selected').prop('selected', true);
+                    });
+                    $('@drpProfessor').multiselect('refresh');
+                </text>
+            }
+        };
+
+
+
+
+        var progress,
+            tabs,
+            allCollegeCheckBox,
+            currentIndex = 0,
+            dropdownlist;
+        $(document).ready(function() {
+            $('#grpConditionContainer').slideToggle(1000);
+            $('#ChangeGroupCondition').change(function() {
+
+
+                if ($('#ChangeGroupCondition').is(':checked')) {
+                    CheckIndicatorForGroup();
+                    SelectedScoreGroup();
+                } else {
+                    UncheckIndicatorForGroup();
+                    deSelectedScoreGroup();
+                }
+
+
+                $('#grpConditionContainer').slideToggle(1000);
+            });
+
+            $('#professorConditionContainer').slideToggle(1000);
+            $('#ChangeProfessorCondition').change(function () {
+
+                if ($('#ChangeProfessorCondition').is(':checked')) {
+                    CheckIndicatorForProfessor();
+                    SelectedScoreProfessor();
+                } else {
+                    UncheckIndicatorForProfessor();
+                    deSelectedScoreProfessor();
+                }
+
+                $('#professorConditionContainer').slideToggle(1000);
+            });
+            progress = $("#reportCompleteness").data("kendoProgressBar");
+            tabs = $("#tabstrip").data("kendoTabStrip");
+            dropdownlist = $("#ReportLevel").data("kendoDropDownList");
+
+            progress.progressStatus.text('مرحله 1');
+
+
+            $("#IsSelectedScorePartGroup").change(function() {
+                $("#IsSelectedIndicatorPartGroup").prop("checked", false);
+            });
+            $("#IsSelectedIndicatorPartGroup").change(function() {
+                $("#IsSelectedScorePartGroup").prop("checked", false);
+            });
+
+            $("#IsSelectedScorePartProfessor").change(function() {
+                $("#IsSelectedIndicatorPartProfessor").prop("checked", false);
+            });
+            $("#IsSelectedIndicatorPartProfessor").change(function() {
+                $("#IsSelectedScorePartProfessor").prop("checked", false);
+            });
+
+
+        });
+
+        function onSelect(e) {
+            var selectedIndex = tabIndexOfElement(e.item),
+
+                isMovingBack = selectedIndex < currentIndex;
+
+            if (isMovingBack || isTabValidAt(currentIndex)) {
+                currentIndex = selectedIndex;
+                tabs.enable(getTabAtIndex(currentIndex), true);
+            } else {
+                e.preventDefault();
+                alert('preventDefault');
+            }
+        }
+
+        function tabIndexOfElement(element) {
+            return tabs.element.find(element).index();
+        }
+
+        function isTabValidAt(tabIndex) {
+            var el = tabs.contentElement(tabIndex),
+                val = $(el).kendoValidator().data("kendoValidator");
+            return val.validate();
+        }
+
+        function getTabAtIndex(index) {
+            return tabs.tabGroup.children().eq(index);
+        }
+
+        function onShow(e) {
+            progress.value(currentIndex + 1);
+
+            var name = $(e.item).find("> .k-link").text();
+            var collegeChange = $('#collegeChange').text();
+            var termDropdownlist = $("#TermId").data("kendoDropDownList");
+            var termId = termDropdownlist.value();
+
+            var levelDropdownlist = $("#ReportLevel").data("kendoDropDownList");
+            var levelId = levelDropdownlist.value();
+
+            //if (levelId == "1") {
+            //    //ToDo 
+            //} else {
+            //    if (levelId == "2") {
+            //        //ToDo 
+            //    } else {
+            //        if (levelId == "3") {
+            //            //ToDo 
+            //        }
+            //    }
+            //}
+            
+
+            if (name == 'گروه' && collegeChange == 'ok') {
+                $('#collegeChange').text('no');
+
+                var colleges = $('#ColList option:selected');
+                var selectedColleges = new Array();
+                $(colleges).each(function(index, college) {
+
+                    var v = $(this).val();
+
+                    selectedColleges.push(v);
+
+                });
+
+                $('option', $('#GrpList')).remove();
+                var jsonColleges = JSON.stringify(selectedColleges);
+                $('#GrpList').multiselect('rebuild');
+
+                var allCollege = $("#AllCollege").is(':checked');
+                $('.loadingWrapper').show();
+                $.getJSON('@Url.Action("GetGroups", "Reports")',
+                    { collegesList: jsonColleges, term: termId, all: allCollege },
+                    function(data) {
+                        $.each(data,
+                            function() {
+                                $('#GrpList').append('<option value=' +
+                                    this.Id +
+                                    //' selected' +
+                                    '>' +
+                                    this.Name +
+                                    '</option>');
+                            });
+                        $('#GrpList').multiselect('rebuild');
+                        $('.loadingWrapper').hide();
+                    });
+
+            } else {
+
+                var groupChange = $('#groupChange').text();
+
+                if (name == 'استاد' && groupChange == 'ok') {
+                    $('#groupChange').text('no');
+
+                    var groups = $('#GrpList option:selected');
+                    var selectedGroups = new Array();
+                    $(groups).each(function(index, college) {
+
+                        var g = $(this).val();
+
+                        selectedGroups.push(g);
+
+                    });
+
+                    $('option', $('#proList')).remove();
+                    var jsonGroups = JSON.stringify(selectedGroups);
+
+                    var allgroup = $("#AllGroup").is(':checked');
+                    $('.loadingWrapper').show();
+                    $.getJSON('@Url.Action("GetProfessores", "Reports")',
+                        {
+                            groupList: jsonGroups,
+                            all: allgroup,
+                            term: termId
+                        },
+                        function(data) {
+                            $.each(data,
+                                function() {
+                                    $('#proList').append('<option value=' +
+                                        this.Id +
+                                        //' selected' +
+                                        '>' +
+                                        this.Name +
+                                        '</option>');
+                                });
+                            $('#proList').multiselect('rebuild');
+                            $('.loadingWrapper').hide();
+                        });
+                } else {
+                    $('#collegeChange').text('no');
+                    $('#groupChange').text('no');
+
+                }
+            }
+
+        }
+
+        function onPreviousClick(e) {
+            e.preventDefault();
+
+            tabs.select(tabs.select().prev());
+        }
+
+        function onNextClick(e) {
+            e.preventDefault();
+
+            tabs.select(getTabAtIndex(currentIndex + 1));
+        }
+
+        function progressBarOnChange(e) {
+            progress.progressStatus.text('مرحله ' + e.value);
+        }
+
+        function progressBarOnComplete(e) {
+
+            progress.progressStatus.text('مرحله ' + e.value);
+        }
+
+
+    </script>
+    <script>
+        $(function () {
+            var validator = $("#reportForm").kendoValidator().data("kendoValidator");
+        });
+
+    </script>
+
+    <script type="text/javascript">
+        $('#ColList').multiselect({
+            onInitialized: function () {
+
+                $.getJSON('@Url.Action("GetColleges", "Reports")',
+                    null,
+                    function (data) {
+                        $.each(data,
+                            function() {
+                                $('#ColList').append('<option value=' +
+                                    this.Id +
+                                    //' selected' +
+                                    '>' +
+                                    this.Name +
+                                    '</option>');
+                            });
+                        $('#ColList').multiselect('rebuild');
+
+                    });
+
+            },
+            onChange: function() {
+                $('#collegeChange').text('ok');
+            },
+            maxWidth: 500,
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            filterPlaceholder: 'جستجو',
+            allSelectedText: "تمامی دانشکده ها انتخاب گردید",
+            buttonText: function(options, select) {
+                if (options.length === 0) {
+                    return 'هیچ دانشکده ای انتخاب نگردید';
+                }
+                var countOfOption = $('#ColList > option').length;
+
+                if (options.length > 0 && options.length < countOfOption) {
+                    return (options.length.toString() + ' دانشکده انتخاب گردید');
+                } else {
+                    return 'تمام دانشکده ها انتخاب گردید';
+                }
+
+            },
+            selectAllText: 'انتخاب تمامی دانشکده ها',
+            onSelectAll: function() {
+                $('#collegeChange').text('ok');
+
+            },
+            onDeselectAll: function() {
+                $('#collegeChange').text('on');
+
+            },
+            selectAllValue: 0,
+            disableIfEmpty: true,
+            buttonWidth: '400px',
+            maxHeight: 200
+        });
+        $('#GrpList').multiselect({
+            maxWidth: 500,
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            filterPlaceholder: 'جستجو',
+            allSelectedText: "تمامی موراد انتخاب گردید",
+            buttonText: function(options, select) {
+                if (options.length === 0) {
+                    return 'هیچ موردی انتخاب نگردید';
+                }
+                var countOfOption = $('#GrpList > option').length;
+
+                if (options.length > 0 && options.length < countOfOption) {
+                    return (options.length.toString() + ' مورد انتخاب گردید');
+                } else {
+                    return 'همه موراد انتخاب گردید';
+                }
+
+            },
+            onChange: function() {
+                $('#groupChange').text('ok');
+            },
+            onSelectAll: function() {
+                $('#groupChange').text('ok');
+
+            },
+            onDeselectAll: function() {
+                $('#groupChange').text('on');
+
+            },
+            selectAllText: 'انتخاب تمامی موارد',
+            selectAllValue: 0,
+            disableIfEmpty: true,
+            buttonWidth: '400px',
+            maxHeight: 200
+        });
+        $('#proList').multiselect({
+            maxWidth: 500,
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            filterPlaceholder: 'جستجو',
+            allSelectedText: "تمامی موراد انتخاب گردید",
+            buttonText: function(options, select) {
+                if (options.length === 0) {
+                    return 'هیچ موردی انتخاب نگردید';
+                }
+                var countOfOption = $('#proList > option').length;
+
+                if (options.length > 0 && options.length < countOfOption) {
+                    return (options.length.toString() + ' مورد انتخاب گردید');
+                } else {
+                    return 'همه موراد انتخاب گردید';
+                }
+
+            },
+            selectAllText: 'انتخاب تمامی موارد',
+            disableIfEmpty: true,
+
+            selectAllValue: 0,
+
+            buttonWidth: '400px',
+            maxHeight: 200
+        });
+
+
+
+
+        @for (int p = 0; p < Model.IndicatorsForGroup.Count; p++)
+        {
+            drp1 = ("#" + "IndicatorsForGroup_" + p + "__SelectedScore");
+
+            <text>
+        $('@drp1').multiselect({
+            // maxWidth: 500,
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            disabledText: 'Disabled ...',
+            filterPlaceholder: 'جستجو',
+            allSelectedText: "تمامی موراد انتخاب گردید",
+            buttonText: function(options, select) {
+                if (options.length === 0) {
+                    return 'هیچ موردی انتخاب نگردید';
+                }
+                var countOfOption = $('@drp1 > option').length;
+
+                if (options.length > 0 && options.length < countOfOption) {
+                    return (options.length.toString() + ' مورد انتخاب گردید');
+                } else {
+                    return 'همه موراد انتخاب گردید';
+                }
+
+            },
+            selectAllText: 'انتخاب تمامی موارد',
+            disableIfEmpty: true,
+            buttonWidth: '90%',
+            maxHeight: 200
+        });
+        $('@drp1').multiselect('selectAll', false);
+        $('@drp1').multiselect('updateButtonText');
+            </text>
+
+        }
+
+
+
+
+
+    </script>
+
+
+    <script type="text/javascript">
+        @for (int k = 0; k < Model.IndicatorsForProfessor.Count; k++)
+        {
+            drp2 = ("#" + "IndicatorsForProfessor_" + k + "__SelectedScore");
+
+            <text>
+                $('@drp2').multiselect({
+                    // maxWidth: 500,
+                    includeSelectAllOption: true,
+                    enableFiltering: true,
+                    filterPlaceholder: 'جستجو',
+                    allSelectedText: "تمامی موراد انتخاب گردید",
+                    buttonText: function(options, select) {
+                        if (options.length === 0) {
+                            return 'هیچ موردی انتخاب نگردید';
+                        }
+                        var countOfOption = $('@drp2 > option').length;
+
+                        if (options.length > 0 && options.length < countOfOption) {
+                            return (options.length.toString() + ' مورد انتخاب گردید');
+                        } else {
+                            return 'همه موراد انتخاب گردید';
+                        }
+
+                    },
+                    selectAllText: 'انتخاب تمامی موارد',
+
+                    disableIfEmpty: true,
+                    buttonWidth: '90%',
+                    maxHeight: 200
+                });
+                $('@drp2').multiselect('selectAll', false);
+                $('@drp2').multiselect('updateButtonText');
+
+            </text>
+
+        }
+
+    </script>
+
+
+    <style>
+        #fieldlist {
+            margin: 0;
+            padding: 0;
+        }
+
+            #fieldlist li {
+                list-style: none;
+                padding-bottom: .7em;
+                text-align: left;
+            }
+
+            #fieldlist label {
+                display: block;
+                padding-bottom: .3em;
+                font-weight: bold;
+                text-transform: uppercase;
+                font-size: 12px;
+                color: #444;
+            }
+
+            #fieldlist li.status {
+                text-align: center;
+            }
+
+            #fieldlist li .k-widget:not(.k-tooltip),
+            #fieldlist li .k-textbox {
+                margin: 0 5px 5px 0;
+            }
+
+        .confirm {
+            padding-top: 1em;
+        }
+
+        .valid {
+            color: green;
+        }
+
+        .invalid {
+            color: red;
+        }
+
+        #fieldlist li input[type="checkbox"] {
+            margin: 0 5px 0 0;
+        }
+
+        span.k-widget.k-tooltip-validation {
+            display: inline-block;
+            width: 160px;
+            text-align: left;
+            border: 0;
+            padding: 0;
+            margin: 0;
+            background: none;
+            box-shadow: none;
+            color: red;
+        }
+
+        .k-tooltip-validation .k-warning {
+            display: none;
+        }
+    </style>
+}

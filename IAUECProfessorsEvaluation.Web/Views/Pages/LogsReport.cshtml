@@ -1,0 +1,175 @@
+﻿@{Layout = "~/Views/Shared/_Layout.cshtml";}
+@using GridMvc.Html
+@using IAUECProfessorsEvaluation.Web.Helpers
+@model List<IAUECProfessorsEvaluation.Web.Models.Log>
+
+<link href="~/Content/MdBootstrapPersianDateTimePicker/jquery.Bootstrap-PersianDateTimePicker.css" rel="stylesheet" />
+
+<script src="~/Scripts/MdBootstrapPersianDateTimePicker/jalaali.js"></script>
+<script src="~/Scripts/MdBootstrapPersianDateTimePicker/jquery.Bootstrap-PersianDateTimePicker.js"></script>
+
+<style>
+    .searchRow .form-group {
+        margin-bottom: 0;
+        margin-top: 8px;
+    }
+
+    .searchRow .control-label {
+        line-height: 36px;
+        font-size: 16px;
+    }
+
+    .searchRowInner {
+        background: #ddd;
+        padding: 15px 0 10px;
+    }
+    .searchRowInner > div > span{line-height: 32px;}
+
+    .grid-cell[data-name="Date"] {
+        direction: ltr;
+        text-align: right;
+    }
+
+    .input-group-addon:last-child{border-left:none;}
+    .popover, .popover *{font-family: inherit !important;}
+</style>
+
+<div class="logsReportWrapper">
+    <div class="row searchRow">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <div class="row searchRowInner">
+                    <div class="col-sm-1">
+                        <span>عنوان گزارش</span>
+                    </div>
+                    <div class="col-sm-2">
+                        <select class="logType form-control"></select>
+                    </div>
+                    <div class="col-sm-1">
+                        <span>تاریخ شروع</span>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="txtFromDate" autocomplete="off" />
+                            <div class="input-group-addon" id="calButtonFrom">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-1">
+                        <span>تاریخ پایان</span>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="txtToDate" autocomplete="off" />
+                            <div class="input-group-addon" id="calButtonTo">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-1">
+                        <a href="/" class="btn btn-info" id="btnSearch">نمایش</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (Model != null)
+    {
+        <div class="row resultRow">
+            <div class="col-sm-12">
+                @(Html
+    .Grid(Model)
+    .Columns(columns =>
+    {
+        columns.Add(model => model.Date).Titled("تاریخ ثبت").SetWidth("15%").Filterable(true).Sortable(true).RenderValueAs(o => GeneralMethods.ConvertToJalaliDateTime(o.Date));
+        columns.Add(model => model.User.Username).Titled("کاربر").SetWidth("10%").Filterable(true).Sortable(false);
+        columns.Add(model => model.LogType.Name).Titled("عنوان").SetWidth("35%").Filterable(true).Sortable(true);
+        columns.Add(model => model.Desacription).Titled("توضیحات").SetWidth("40%").Filterable(true).Sortable(true);
+    })
+    .WithMultipleFilters()
+    .WithPaging(20)
+    .EmptyText("موردی جهت نمایش یافت نشد.")
+    .SetLanguage("fa")
+    .Selectable(false)
+                )
+            </div>
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        @if (ViewBag.LogTypes != null) {
+            <text>
+        var logTypeNames = [];
+        var logTypeIds = [];
+        </text>
+            foreach (var item in ViewBag.LogTypes) {
+                <text>
+        logTypeNames.push('@item.Name');
+        logTypeIds.push('@item.Id');
+        </text>
+            }
+            <text>
+        $('.logType').empty().append('<option value="-1">انتخاب کنید</option>');
+        $.each(logTypeNames, function (i, v) {
+            $('.logType').append('<option value="' + logTypeIds[i] + '">' + v + '</option>');
+        });
+        </text>
+            if (!string.IsNullOrEmpty(ViewBag.FilterLogType))
+            {
+                <text>
+        $('.logType').val('@ViewBag.FilterLogType');
+        $('#txtFromDate').val('@ViewBag.FilterFromDate');
+        $('#txtToDate').val('@ViewBag.FilterToDate');
+                </text>
+            }
+        }
+
+        $('#btnSearch').click(function (e) {
+            e.preventDefault();
+            $('.loadingWrapper').show();
+            $.ajax({
+                url: '/Pages/LogReportFilter',
+                type: 'POST',
+                data: { logType: $('.logType').val(), fromDate: $('#txtFromDate').val(), toDate: $('#txtToDate').val() },
+                success: function (data) { window.location.href = data; }
+            });
+        });
+
+    });
+
+    /*---------------------*/
+    $('#txtFromDate, #calButtonFrom').MdPersianDateTimePicker({
+        Placement: 'bottom',
+        Trigger: 'click',
+        EnableTimePicker: false,
+        TargetSelector: '#txtFromDate',
+        GroupId: 'test',
+        ToDate: false,
+        FromDate: true,
+        DisableBeforeToday: false,
+        Disabled: false,
+        Format: 'yyyy/MM/dd',
+        IsGregorian: false,
+        EnglishNumber: false,
+        InLine: false
+    });
+    $('#txtToDate, #calButtonTo').MdPersianDateTimePicker({
+        Placement: 'bottom',
+        Trigger: 'click',
+        EnableTimePicker: false,
+        TargetSelector: '#txtToDate',
+        GroupId: 'test',
+        ToDate: true,
+        FromDate: false,
+        DisableBeforeToday: false,
+        Disabled: false,
+        Format: 'yyyy/MM/dd',
+        IsGregorian: false,
+        EnglishNumber: false,
+        InLine: false
+    });
+    /*---------------------*/
+</script>

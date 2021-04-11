@@ -1,0 +1,131 @@
+﻿@model IAUECProfessorsEvaluation.Web.Models.IndexModel
+@if (Model != null)
+{
+    var totalEducationalGroupsCount = Model.educationalGroupCountInRank1 + Model.educationalGroupCountInRank2 + Model.educationalGroupCountInRank3 + Model.educationalGroupCountInRank4
+        + Model.educationalGroupCountInRank5;
+    var percent1 = ((decimal)Model.educationalGroupCountInRank1 * 100) / (decimal)totalEducationalGroupsCount;
+    var percent2 = ((decimal)Model.educationalGroupCountInRank2 * 100) / (decimal)totalEducationalGroupsCount;
+    var percent3 = ((decimal)Model.educationalGroupCountInRank3 * 100) / (decimal)totalEducationalGroupsCount;
+    var percent4 = ((decimal)Model.educationalGroupCountInRank4 * 100) / (decimal)totalEducationalGroupsCount;
+    var percent5 = ((decimal)Model.educationalGroupCountInRank5 * 100) / (decimal)totalEducationalGroupsCount;
+
+    <div class="row widgetTitle">
+        رتبه بندی گروه های آموزشی در سطح دانشگاه
+    </div>
+    <div class="row widgetBox">
+        <div class="col-sm-5">
+            <div class="row topRanks">
+                <div class="col-sm-2">
+                    رتبه 1
+                </div>
+                <div class="col-sm-10">
+                    گروه @Model.topEducationalGroupName1
+                </div>
+            </div>
+            <div class="row topRanks">
+                <div class="col-sm-2">
+                    رتبه 2
+                </div>
+                <div class="col-sm-10">
+                    گروه @Model.topEducationalGroupName2
+                </div>
+            </div>
+            <div class="row topRanks">
+                <div class="col-sm-2">
+                    رتبه 3
+                </div>
+                <div class="col-sm-10">
+                    گروه @Model.topEducationalGroupName3
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-7">
+            <div class="row">
+                <div class="col-sm-6">
+                    <canvas class="canvasDoughnut" height="250" width="250" style="margin: 15px 10px 10px 0" id="canvasGIUDoughnut"></canvas>
+                </div>
+                <div class="col-sm-6 titleInfoWrapper">
+                    <table class="tile_info">
+                        <tr>
+                            <td>
+                                <p><i class="fa fa-square blue"></i>بیش از 900 امتیاز</p>
+                            </td>
+                            <td>@percent1.ToString("n2")%</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p><i class="fa fa-square green"></i>بین 700 تا 900 امتیاز</p>
+                            </td>
+                            <td>@percent2.ToString("n2")%</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p><i class="fa fa-square purple"></i>بین 500 تا 700 امتیاز</p>
+                            </td>
+                            <td>@percent3.ToString("n2")%</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p><i class="fa fa-square aero"></i>بین 300 تا 500 امتیاز</p>
+                            </td>
+                            <td>@percent4.ToString("n2")%</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p><i class="fa fa-square red"></i>کمتر از 300 امتیاز</p>
+                            </td>
+                            <td>@percent5.ToString("n2")%</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        $(function () {
+            if ($('#canvasGIUDoughnut').length) {
+                var canvasDoughnut = new Chart(document.getElementById("canvasGIUDoughnut"), {
+                    type: 'doughnut',
+                    tooltipFillColor: "rgba(51, 51, 51, 0.55)",
+                    data: {
+                        labels: [
+                            "بیش از 900 امتیاز",
+                            "بین 700 تا 899 امتیاز",
+                            "بین 500 تا 699 امتیاز",
+                            "بین 300 تا 499 امتیاز",
+                            "کمتر از 300 امتیاز"
+                        ],
+                        datasets: [{
+                            data: [
+                                @Model.educationalGroupCountInRank1,
+                                @Model.educationalGroupCountInRank2,
+                                @Model.educationalGroupCountInRank3,
+                                @Model.educationalGroupCountInRank4,
+                                @Model.educationalGroupCountInRank5],
+                            backgroundColor: [
+                                "#3498db",
+                                "#1abb9c",
+                                "#9b59b6",
+                                "#9cc2cb",
+                                "#e74c3c"
+                            ],
+                            hoverBackgroundColor: [
+                                "#197cbd",
+                                "#05a586",
+                                "#843ea1",
+                                "#76a6b1",
+                                "#cb2e1e"
+                            ]
+                        }]
+                    },
+                    options: {
+                        legend: false,
+                        responsive: false
+                    }
+                });
+            }
+        });
+    </script>
+}

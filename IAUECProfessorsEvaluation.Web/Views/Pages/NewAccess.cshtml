@@ -1,0 +1,45 @@
+﻿@{Layout = "~/Views/Shared/_BlankLayout.cshtml";}
+@model IAUECProfessorsEvaluation.Web.Models.RoleAccess
+
+<style>
+    .row{margin-bottom: 15px;}
+    .textCenter{text-align:center;}
+</style>
+
+<div class="row">
+    <div class="col-sm-4">
+        <span>عنوان نقش</span>
+    </div>
+    <div class="col-sm-8">
+        @Html.DropDownList("RoleList", (SelectList)ViewBag.RoleList, "انتخاب کنید", new { @class = "form-control" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-4">
+        <span>عنوان بخش</span>
+    </div>
+    <div class="col-sm-8">
+        @Html.DropDownList("PageList", (SelectList)ViewBag.PageList, "انتخاب کنید", new { @class = "form-control" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12 textCenter">
+        <a href="/" class="btn btn-success" id="addRoleAccess">ثبت</a>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $('#addRoleAccess').click(function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: '/Pages/AddAccess',
+                type: 'POST',
+                data: { roleId: $('#RoleList').val(), pageId: $('#PageList').val() },
+                success: function (result) {
+                    location.reload();
+                }
+            });
+        });
+    });
+</script>

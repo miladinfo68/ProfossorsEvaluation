@@ -1,0 +1,81 @@
+﻿@{Layout = "~/Views/Shared/_BlankLayout.cshtml";}
+@model IAUECProfessorsEvaluation.Model.Models.EducationalClass
+
+<style>
+    .educationalClassInfo .row{margin-bottom: 15px;}
+</style>
+
+<div class="educationalClassInfo">
+    <div class="row">
+        <div class="col-sm-2">
+            کد کلاس:
+        </div>
+        <div class="col-sm-3">
+            @Model.CodeClass
+        </div>
+        <div class="col-sm-4">
+            تعداد جلسات برگزار شده بصورت آنلاین:
+        </div>
+        <div class="col-sm-3">
+            @Html.TextBoxFor(t => t.OnlineHeldingCount, new { @class = "form-control", @id = "onlineHelding" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-2">
+            عنوان کلاس:
+        </div>
+        <div class="col-sm-3">
+            @Model.Name
+        </div>
+        <div class="col-sm-4">
+            تعداد جلسات برگزار شده بصورت حضوری:
+        </div>
+        <div class="col-sm-3">
+            @Html.TextBoxFor(t => t.PersentHeldingCount, new { @class = "form-control", @id = "persentHelding" })
+        </div>
+        
+
+    </div>
+    <div class="row">
+        <div class="col-sm-2">
+            نام استاد:
+        </div>
+        <div class="col-sm-3">
+            @Model.Professor.Name @Model.Professor.Family
+        </div>
+        <div class="col-sm-4">
+            سایر جلسات (تعطیلات رسمی، لغو شده و ...):
+        </div>
+        <div class="col-sm-3">
+            @Html.TextBoxFor(t => t.OthersHeldingCount, new { @class = "form-control", @id = "othersHelding" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 textCenter">
+            <a href="/" class="btn btn-success" id="btnSave">ذخیره</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $(document).on('click', '#btnSave', function (e) {
+            e.preventDefault();
+            $.ajax({
+                url: '/EducationalClasses/UpdateClassDetails',
+                type: 'POST',
+                data: {
+                    classCodeData: @Model.CodeClass,
+                    onlineHeld: $('#onlineHelding').val(),
+                    presentHeld: $('#persentHelding').val(),
+                    other: $('#othersHelding').val(),
+                    termId: @ViewBag.TermId
+                },
+                success: function (result) {
+                    //$('.ui-dialog-content').dialog('close');
+                    location.reload();
+                }
+            });
+        });
+    });
+</script>

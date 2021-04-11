@@ -1,0 +1,228 @@
+﻿@{Layout = "~/Views/Shared/_BlankLayout.cshtml";}
+@model IAUECProfessorsEvaluation.Web.Models.Indicator
+@using IAUECProfessorsEvaluation.Web.Controllers
+@using GridMvc.Html
+@{
+    var hasLimit = ViewBag.IndicatorHasLimit;
+}
+
+<style>
+    .errorWrapper {
+        display: none;
+    }
+
+    .actionButtons {
+        min-width: 110px;
+    }
+
+    #showNewScore th {
+        text-align: center;
+    }
+
+    #showNewScore .grid-header-title {
+        margin-right: 0;
+    }
+</style>
+
+<div>
+    <div class="errorWrapper alert alert-danger">
+        <ul></ul>
+    </div>
+    @using (Html.BeginForm(null, null, FormMethod.Post, new { id = "AddOrUpdateGroupIndicatorForm" }))
+    {
+        <div class="form-group">
+            @Html.TextBoxFor(x => x.Name, new { @placeholder = "عنوان شاخص", @class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.DropDownListFor(x => x.Ratio.Id, ViewBag.ratio as List<SelectListItem>, "میزان اهمیت", new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+
+            @*@if (Model.Scores != null)
+                {*@
+            <div>
+                <a id="AddScoreForIndicator" href="/" class="btn btn-success"><i class="fa fa-plus-circle "></i> افزودن امتیاز ها جدید</a>
+                <button type="submit" class="btn btn-info addOrUpdateIndicator" style="float: left">ذخیره <i class="fa fa-save "></i></button>
+            </div>
+            @*@(Html.Grid(Model.Scores).Columns(columns =>
+                {
+                    columns.Add(model => model.Name).Titled("عنوان").SetWidth("20%");
+                    columns.Add(model => model.Point).Titled("امتیاز");
+                    columns.Add(model => model.MaxValue).Titled("حداکثر");
+                    columns.Add(model => model.MinValue).Titled("حداقل");
+                    columns.Add(model => model.Id).Titled("عملیات").SetWidth("20%")
+                  .Encoded(false).Sanitized(false)
+                  .RenderValueAs(o => "<a class=\"btn btn-info EditScoreForIndicator\" data-id=\"" + o.Id + "\" title=\"ویرایش امتیاز\"><i class=\"fa fa-pencil\"></i></a><a  class=\"btn btn-danger DeleteScoreForIndicator\" data-id=\"" + o.Id + "\" title=\"حذف امتیاز\"><i class=\"fa fa-trash\"></i></a>");
+
+                }).SetLanguage("fa")
+                          .EmptyText("موردی جهت نمایش یافت نشد."))*@
+
+
+            <div id="showNewScore">
+                <div class="grid-wrap">
+                    <table class="table table-striped grid-table" style="text-align: center">
+                        <thead>
+                            <tr>
+                                <th class="grid-header">
+                                    <div class="grid-header-title">
+                                        <span>عنوان</span>
+                                    </div>
+                                </th>
+                                @if (hasLimit)
+                                {
+                                    <th class="grid-header">
+                                        <div class="grid-header-title">
+                                            <span>شروع بازه</span>
+                                        </div>
+                                    </th>
+                                    <th class="grid-header">
+                                        <div class="grid-header-title">
+                                            <span>پایان بازه</span>
+                                        </div>
+                                    </th>
+                                }
+                                <th class="grid-header">
+                                    <div class="grid-header-title">
+                                        <span>امتیاز</span>
+                                    </div>
+                                </th>
+                                <th class="grid-header">
+
+                                    <div class="grid-header-title">
+                                        <span>عملیات</span>
+                                    </div>
+                                </th>
+
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Scores)
+                            {
+                                <tr id="@("tr" + (Model.Scores.ToList().FindIndex(a=> a.Id == item.Id) + 1))" class="grid-row">
+                                    <td class="grid-cell">
+                                        @item.Name
+                                    </td>
+                                    @if (hasLimit)
+                                    {
+                                        <td class="grid-cell">
+                                            @item.MinValue
+                                        </td>
+                                        <td class="grid-cell">
+                                            @item.MaxValue
+                                        </td>
+                                    }
+                                    <td class="grid-cell">
+                                        @item.Point
+                                    </td>
+                                    <td class="grid-cell actionButtons">
+                                        <a class="btn btn-info EditScoreForIndicator" data-id="@item.Id" title="ویرایش امتیاز"><i class="fa fa-pencil"></i></a>
+                                        <a class="btn btn-danger DeleteScoreForIndicator" data-id="@item.Id" title="حذف امتیاز"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <input type="hidden" id="scoreCount" />
+                </div>
+            </div>
+            @*}
+                else
+                {
+                    <a id="AddScoreForIndicator" href="/" class="btn btn-success"><i class="fa fa-plus-circle "></i> افزودن امتیاز ها جدید</a>
+                    <button type="submit" class="btn btn-info addOrUpdateIndicator" style="float: left">ذخیره <i class="fa fa-save "></i></button>
+                    <div id="showNewScore"></div>
+                }*@
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $('.errorWrapper').hide();
+        var rowIndex = @Model.Scores.Count() > 0 ? @(Model.Scores.Count() + 1) : 1;
+        $('#AddScoreForIndicator').click(function (e) {
+            e.preventDefault();
+            if($('#scoreCount').val() === '')
+                $('#scoreCount').val(@(Model.Scores.Count() + ((List<IAUECProfessorsEvaluation.Model.Models.Score>)Session["ScoreList"]).Count()));
+            if (parseInt($('#scoreCount').val()) + 1 == rowIndex) {
+                $.ajax({
+                    url: '/Indicator/AddScoreGroupIndicator',
+                    type: 'Get',
+                    data: { 'indexer': rowIndex, 'hasLimit': '@hasLimit' },
+
+                    success: function (result) {
+                        if (rowIndex == 1) {
+                            $('#showNewScore tbody').append(result + '<span id="rowIndex' + (rowIndex) + '" hidden>' + (rowIndex) + '</span>');
+                        }
+                        else {
+                            var i = '#tr' + (rowIndex - 1).toString();
+                            $(i).after(result + '<span id="rowIndex' + (rowIndex) + '" hidden>' + (rowIndex) + '</span>');
+                        }
+                        ++rowIndex;
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) { alert(xhr.responseText); }
+                });
+            }
+        });
+        $('.EditScoreForIndicator').click(function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            var t = $(this);
+            $.ajax({
+                url: '/Indicator/EditScoreForIndicator',
+                type: 'Post',
+                data: { id: $(this).data("id"), 'hasLimit': '@hasLimit' },
+
+                success: function (resualt) {
+                    t.parent().find('a').hide();
+                    t.parent().parent().after(resualt);
+
+                },
+                error: function (sender) {
+                    alert(sender.responseText);
+                }
+            });
+        });
+        $('.DeleteScoreForIndicator').click(function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if (confirm('آیا از حذف این امتیاز اطمینان دارید?')) {
+                var t = $(this);
+                $.ajax({
+                    url: '/Indicator/DeleteScoreForGroupIndicator',
+                    type: 'Post',
+                    data: { id: $(this).data("id") },
+
+                    success: function (resualt) {
+                        t.closest('#dialog').html(resualt);
+                    },
+                    error: function (sender) {
+                        alert(sender.responseText);
+                    }
+                });
+            }
+        });
+        $('.addOrUpdateIndicator').click(function (e) {
+            var nameValidation = true;
+            var ratioValidation = true;
+            var message = '';
+            if ($('#Name').val() === '') {
+                message += '<li>نام شاخص را وارد نمائید.</li>'
+                nameValidation = false;
+            }
+            if ($('#Ratio_Id').val() === "") {
+                message += '<li>میزان اهمیت شاخص را وارد نمائید.</li>'
+                ratioValidation = false;
+            }
+            if (nameValidation && ratioValidation) {
+                return true;
+            }
+            else {
+                $('.errorWrapper ul').html(message);
+                $('.errorWrapper').show();
+                return false;
+            }
+        });
+    });
+</script>

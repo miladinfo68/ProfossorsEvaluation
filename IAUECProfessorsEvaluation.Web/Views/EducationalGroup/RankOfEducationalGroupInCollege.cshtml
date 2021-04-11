@@ -1,0 +1,254 @@
+﻿@{Layout = "~/Views/Shared/_Layout.cshtml";}
+@model List<IAUECProfessorsEvaluation.Data.ReportModel.GroupReportModel>
+@using GridMvc.Html
+
+@{
+    var canChangeCollege = Session["UserInfo"] != null
+        && (((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsAdministrator || ((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsPowerUser);
+}
+
+<style>
+    .searchRow {
+        border-bottom: 1px solid #ccc;
+        background: #ddd;
+        margin-left: -20px;
+        margin-right: -20px;
+        min-height: 70px;
+    }
+
+        .searchRow .form-group {
+            margin-bottom: 0;
+            margin-top: 8px;
+        }
+
+        .searchRow .control-label {
+            line-height: 36px;
+            font-size: 16px;
+        }
+
+    .topProfessorImage {
+        position: absolute;
+        left: 10px;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        height: 70px;
+        overflow: hidden;
+        width: 25%;
+        max-width: 70px;
+        border: 2px solid #ccc;
+        border-radius: 50%;
+        text-align: center;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+        .topProfessorImage img {
+            width: 100%;
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+        }
+
+    .topProfessorName {
+        display: inline-block;
+        vertical-align: top;
+        width: 75%;
+        white-space: pre-wrap;
+    }
+    /*------------*/
+    .tile_count .tile_stats_count::before {
+        height: 80%;
+    }
+    /*------------*/
+</style>
+
+<div class="row searchRow">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-12">
+                    <span style="display: inline-block; padding: 0 0 10px;">
+                        تاریخ آخرین بروزرسانی: @ViewBag.LastUpdate
+                    </span>
+                </div>
+            </div>
+            <div class="row">
+                @if (canChangeCollege)
+                {
+                    <div class="col-sm-2">
+                        <span class="control-label">نام دانشکده: </span>
+                    </div>
+                    <div class="col-sm-3">
+                        @Html.DropDownList("CollegeList", (SelectList)ViewBag.CollegeList, "انتخاب کنید", new { @class = "form-control" })
+                    </div>
+                }
+                <div class="col-sm-1">
+                    <span class="control-label">ترم: </span>
+                </div>
+                <div class="col-sm-3">
+                    @Html.DropDownList("TermList", (SelectList)ViewBag.TermList, "انتخاب کنید", new { @class = "form-control" })
+                </div>
+                <div class="col-sm-2">
+                    <a href="/" id="showResult" class="btn btn-info"><i class="fa fa-search"></i> نمایش</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model != null)
+{
+    <div class="row tileTitle">
+        <div class="col-sm-12">
+            <h3>گروه های برتر دانشکده @ViewBag.CollegeName</h3>
+        </div>
+    </div>
+    <div class="row tile_count">
+        @if (Model.Count > 0)
+        {
+            <div class="col-md-4 col-sm-4 col-xs-6 tile_stats_count">
+                <span class="count_top"><i class="fa fa-user"></i> رتبه اول</span>
+                <div class="count green">گروه @Model.ElementAt(0).GroupName</div>
+            </div>
+        }
+        @if (Model.Count > 1)
+        {
+            <div class="col-md-4 col-sm-4 col-xs-6 tile_stats_count">
+                <span class="count_top"><i class="fa fa-user"></i> رتبه دوم</span>
+                <div class="count green">گروه @Model.ElementAt(1).GroupName</div>
+            </div>
+        }
+        @if (Model.Count > 2)
+        {
+            <div class="col-md-4 col-sm-4 col-xs-6 tile_stats_count">
+                <span class="count_top"><i class="fa fa-user"></i> رتبه سوم</span>
+                <div class="count green">گروه @Model.ElementAt(2).GroupName</div>
+            </div>
+        }
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            @(Html
+        .Grid(Model)
+        .Columns(columns =>
+        {
+            columns.Add(model => model.RowNumber).Titled("رتبه").SetWidth("10%").Filterable(true).Sortable(true);
+            columns.Add(model => model.GroupName).Titled("عنوان گروه").SetWidth("25%").Filterable(true).Sortable(true);
+            //columns.Add(model => model.GroupManger).Titled("نام مدیر گروه").RenderValueAs(o => o.GroupManger.Name + " " + o.GroupManger.Family).SetWidth("25%").Filterable(false).Sortable(false);
+            columns.Add(model => model.GroupCode).Titled("کد گروه").SetWidth("15%").Filterable(true).Sortable(true);
+            columns.Add(model => model.GroupScore).Titled("امتیاز فعلی").SetWidth("15%").Filterable(true).Sortable(true);
+            columns.Add(model => model.GroupId).Titled("عملیات").SetWidth("10%").Filterable(false)
+                .Encoded(false).Sanitized(false)
+                .RenderValueAs(o => "<a id=\"ViewRankDetails\" href=\"/\" class=\"btn btn-info\" data-id=\"" + o.GroupId + "\"><i class=\"fa fa-info\"></i> مشاهده جزئیات</a>");
+        })
+        .WithMultipleFilters()
+        .WithPaging(20)
+        .EmptyText("موردی جهت نمایش یافت نشد.")
+        .SetLanguage("fa")
+            )
+        </div>
+        <div id="dialog"></div>
+    </div>
+
+    <script>
+        $(function () {
+            $(document).on('click', '#ViewRankDetails', function (e) {
+                e.preventDefault();
+                //var href = "/EducationalGroup/ViewGroupRankInUniversityDetails/" + $(this).data("id");
+                //$('#dialog').dialog({
+                //    modal: true,
+                //    open: function (event, ui) {
+                //        $(this).load(href, function (result) { });
+                //        return false;
+                //    },
+                //    width: 768,
+                //    maxHeight: 600,
+                //    minHeight: 300,
+                //    position: { my: 'center top', at: 'center top' },
+                //    close: function (event, ui) { $('#dialog').html("") }
+                //});
+                $.ajax({
+                    url: '@Url.Action("ViewGroupRankInUniversityDetails", "EducationalGroup")',
+                    type: 'Get',
+                    data: { 'id': $(this).data("id"), 'termId': $('#TermList').val() },
+                    success: function (data) {
+                        $("#dialog").html(data);
+                        $('#dialog').dialog({
+                            modal: true,
+                            width: 768,
+                            maxHeight: 600,
+                            minHeight: 300,
+                            position: { my: 'center top', at: 'center top' },
+                            close: function (event, ui) {
+                                $('#dialog').html("")
+                            }
+                        });
+                    }
+                });
+
+                return false;
+            });
+
+
+            /////////////
+            function getUrlVars() {
+                var vars = [], hash;
+                var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+                for (var i = 0; i < hashes.length; i++) {
+                    hash = hashes[i].split('=');
+                    vars.push(hash[0]);
+                    vars[hash[0]] = hash[1];
+                }
+                return vars;
+            }
+
+            var college = getUrlVars()["id"];
+            var term = getUrlVars()["term"];
+            $('#CollegeList').val(college);
+            $('#TermList').val(term);
+            /////////////
+        });
+    </script>
+}
+
+
+<script>
+    $(function () {
+        var maxHeight = 0;
+        setTilesHeight();
+        $(document).on('click', '#showResult', function (e) {
+            e.preventDefault();
+            @if (canChangeCollege)
+            {
+            <text>
+            if ($('#CollegeList').val() !== '' && $('#TermList').val() !== '') {
+                $('.loadingWrapper').show();
+                window.location.href = '/EducationalGroup/RankOfEducationalGroupInCollege/?id=' + $('#CollegeList').val() + '&term=' + $('#TermList').val();
+            }
+            </text>
+            }
+            else
+            {
+                <text>
+            if ($('#TermList').val() !== '') {
+                $('.loadingWrapper').show();
+                window.location.href = '/EducationalGroup/RankOfEducationalGroupInCollege/?term=' + $('#TermList').val();
+            }
+            </text>
+            }
+
+        });
+        $(window).on('resize', function () { setTilesHeight(); });
+        function setTilesHeight() {
+            maxHeight = 0;
+            $('.tile_stats_count').each(function () {
+                if ($(this).height() > maxHeight) maxHeight = $(this).height();
+            });
+            $('.tile_stats_count').css('height', maxHeight + 'px');
+        }
+    });
+</script>

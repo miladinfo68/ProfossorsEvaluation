@@ -1,0 +1,100 @@
+﻿@{
+    IAUECProfessorsEvaluation.Web.Models.User userInfo = new IAUECProfessorsEvaluation.Web.Models.User();
+    if (Session["UserInfo"] != null)
+    {
+        userInfo = (IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"];
+    }
+    else
+    {
+        Response.Redirect("~/Pages/Login");
+    }
+    var model = (List<IAUECProfessorsEvaluation.Web.Models.MenuSection>)ViewBag.Menu;
+    var isAdmin = Session["UserInfo"] != null && ((IAUECProfessorsEvaluation.Web.Models.User)Session["UserInfo"]).IsAdministrator;
+}
+
+<div class="navbar nav_title" style="border: 0;">
+    <a href="/" class="site_title"><img src="~/Content/images/smallLogo-White.png" /> <span>دانشگاه آزاد اسلامی</span></a>
+</div>
+
+<div class="clearfix"></div>
+
+<div class="profile clearfix">
+    <div class="profile_pic">
+        @*<img src="../build/images/img.jpg" alt="..." class="img-circle profile_img">*@
+    </div>
+    <div class="profile_info">
+        <h2>@ViewBag.FullName</h2>
+        <span>، خوش آمدید</span>
+    </div>
+</div>
+
+<br />
+
+<!-- sidebar menu -->
+<div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+@foreach (var menuSection in model)
+{
+    <div class="menu_section">
+
+        @if (menuSection.MenuLists.FirstOrDefault().Accesses.Count > 1 || menuSection.MenuLists.Count > 1)
+        {
+
+            <h3>@menuSection.Name</h3>
+            <ul class="nav side-menu">
+
+                @foreach (var menuList in menuSection.MenuLists)
+                {
+                if (menuList.Id != 7 || isAdmin)
+                {
+
+                <li>
+                    <a><i class="fa @menuList.Icon"></i> @menuList.Name <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                        @foreach (var access in menuList.Accesses)
+                        {
+                            <li @(ViewBag.MenuItem != null && ViewBag.MenuItem == access.Action ? "class=current-page" : "")>
+                                @Html.ActionLink(access.Title, access.Action, access.Controller, null, new { @class = "rightMenuLink" })
+                            </li>
+                        }
+                    </ul>
+                </li>
+                }
+                }
+
+
+            </ul>
+        }
+        else
+        {
+            <ul class="nav side-menu">
+                <li @(ViewBag.MenuItem != null && ViewBag.MenuItem == menuSection.MenuLists.FirstOrDefault().Accesses.FirstOrDefault().Action ? "class=current-page" : "")>
+                    <i class="fa @menuSection.MenuLists.FirstOrDefault().Accesses.FirstOrDefault().MenuList.Icon singleItem"></i>
+                    @Html.ActionLink(
+                menuSection.MenuLists.FirstOrDefault().Accesses.FirstOrDefault().Title,
+                menuSection.MenuLists.FirstOrDefault().Accesses.FirstOrDefault().Action,
+                menuSection.MenuLists.FirstOrDefault().Accesses.FirstOrDefault().Controller, null, new { @class = "rightMenuLink singleItem" })
+                </li>
+                </ul>
+                }
+        </div>
+}
+</div>
+<!-- /sidebar menu -->
+<!-- /menu footer buttons -->
+<div class="sidebar-footer hidden-small">
+    @*<a data-toggle="tooltip" data-placement="top" title="تنظیمات">
+        <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+    </a>
+    <a data-toggle="tooltip" data-placement="top" title="تمام صفحه">
+        <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
+    </a>
+    <a data-toggle="tooltip" data-placement="top" title="قفل">
+        <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+    </a>
+    <a id="logoff" data-toggle="tooltip" data-placement="top" title="خروج">
+        <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+    </a>*@
+</div>
+<!-- /menu footer buttons -->
+
+

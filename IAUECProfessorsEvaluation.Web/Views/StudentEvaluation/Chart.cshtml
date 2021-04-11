@@ -1,0 +1,589 @@
+﻿
+@{
+    var terms = ViewBag.Terms as Dictionary<int, string>;
+}
+<script src="~/Scripts/highcharts/highcharts.js"></script>
+<script src="~/Scripts/highcharts/highcharts-3d.js"></script>
+<script src="~/Scripts/highcharts/cylinder.js"></script>
+<script src="~/Scripts/highcharts/funnel3d.js"></script>
+<script src="~/Scripts/highcharts/pyramid3d.js"></script>
+<script src="~/Scripts/highcharts/exporting.js"></script>
+<script src="~/Scripts/highcharts/export-data.js"></script>
+<script src="~/Scripts/highcharts/accessibility.js"></script>
+<style>
+    .highcharts-credits {
+        display: none !important;
+    }
+
+    .highcharts-axis-title {
+        display: none !important;
+    }
+
+    .highcharts-menu > :first-child {
+        display: none !important;
+    }
+
+    .highcharts-title tspan {
+        width: 100px;
+        word-break: break-word !important;
+        white-space: normal !important;
+    }
+
+    .pcalBtn {
+        position: absolute;
+        top: 28px;
+        left: 16px;
+        width: 50px !important;
+        height: 50px !important;
+    }
+    .container-chart{
+        border-top:1px solid black;
+        padding-top:4px;
+    }
+</style>
+<div class="panel panel-info">
+    <div class="panel-heading">گزارش تصویری ارزیابی واحد</div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-lg-4 col-md-4 col-xs-12">
+                <label>ترم :</label>
+                <select class="form-control" id="term">
+                    <option value="0">انتخاب کنید</option>
+                    @foreach (var item in terms)
+                    {
+                        <option value="@(item.Key)">@(item.Value)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-lg-4 col-md-4 col-xs-12">
+                <label for="StartDate">تاریخ شروع</label>
+                <input type="text" id="StartDate" class="pdate form-control" />
+                <script>
+                    var objCal1 = new AMIB.persianCalendar('StartDate');
+                </script>
+            </div>
+            <div class="col-lg-4 col-md-4 col-xs-12">
+                <label for="EndDate">تاریخ پایان</label>
+                <input type="text" id="EndDate" class="pdate form-control" />
+                <script>
+                    var objCal2 = new AMIB.persianCalendar('EndDate');
+                </script>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-xs-112" style="margin-top: 7px;float:left;">
+                <button class="btn btn-info" id="getChart">
+                    نمایش
+                </button>
+            </div>
+        </div>
+        <div class="row container-chart">
+
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#getChart").click(function () {
+        getChart();
+    });
+
+    function getChart() {
+        $.ajax({
+                url: '@Url.Action("GetChart", "StudentEvaluation")',
+                type: 'GET',
+                data: {
+                    professorId: 0,
+                    classId: 0,
+                    evaluationTypeId: 1,
+                    termId: $("#term").val(),
+                    startDate: $("#StartDate").val(),
+                    endDate: $("#EndDate").val()
+                },
+                beforeSend: function () {
+                    $('.loadingWrapper').show();
+                },
+            success: function (data) {
+                $(".container-chart").text("");
+                debugger;
+                if (data.length == 0) {
+                    $(".container-chart").text("اطلاعاتی چهت نمایش وجود ندارد");
+                     $('.loadingWrapper').hide();
+                    return;
+                }
+
+                    debugger;
+                    // alert(data);
+                    $('.loadingWrapper').show();
+                    for (var i in data) {
+
+                        if (data[i].SubQuestions == null) {
+
+                            var series = new Array();
+                            for (var j in data[i].AnswerPercentage) {
+
+                                if (data[i].AnswerPercentage[j].length != 0) {
+
+                                    var serie = new Array(data[i].AnswerPercentage[j].Value, data[i].AnswerPercentage[j].Item);
+                                    series.push(serie);
+                                }
+                            }
+                            var ContainerTemplate = '<div id=' + data[i].Question.Id + ' class="col-lg-4 col-md-4- col-4" style="border: 1px solid;border-radius: 15px" ></div>';
+                        $('.container-chart').append(ContainerTemplate);
+
+                            //DrawColumn3dChart(series, data[i].Question.Id,data[i].Question.Text);
+                            drawChart(series, data[i].Question.Id,data[i].Question.Text,"",data[i].Question.EvaluationChartTypeId);
+
+
+                        }
+                        if (data[i].SubQuestions != null) {
+
+                            for (var j in data[i].SubQuestions) {
+                                 var series = new Array();
+                            for (var k in data[i].AnswerPercentage) {
+
+
+                                    var serie = new Array(data[i].AnswerPercentage[k].Value, data[i].AnswerPercentage[k].Item);
+                                    series.push(serie);
+
+                                }
+                                var containerId = data[i].Question.Id + data[i].Question.ParentId;
+                            var ContainerTemplate = '<div id=' + containerId + ' class="col-lg-4 col-md-4- col-4" style="border: 1px solid;border-radius: 15px"></div>';
+                        $('.container-chart').append(ContainerTemplate);
+
+                                //DrawColumn3dChart(series, containerId, data[i].Question.ParentQuestionText, data[i].Question.Text);
+                                drawChart(series, containerId,data[i].Question.ParentQuestionText, data[i].Question.Text,data[i].Question.EvaluationChartTypeId);
+
+                            }
+                        }
+
+
+                    }
+                    $(".container-message-befor").css("display", "none");
+                    setTimeout(
+                      function()
+                      {
+                         $('.loadingWrapper').hide();
+                      }, 3000);
+
+                    //
+                    //var series = new Array();
+                    //for (var i = 0; i < 1; i++) {
+                    //    var serie = new Array("value" + i, i + 10.2);
+                    //     series.push(serie);
+                    //}
+                    //DrawPieChart(series);
+                    //for (var i in data) {
+                    //
+                    //    if (data[i].AnswerPercentage.length != 0) {
+                    //        var serie = new Array(data[i].AnswerPercentage[0].Item, data[i].AnswerPercentage[0].Value);
+                    //        series.push(serie);
+                    //    }
+                    //}
+
+                },
+                error: function (request, error) {
+                    alert("Request: " + JSON.stringify(request));
+                },
+                complete: function () {
+
+                }
+            });
+    }
+    $(function () {
+
+        //$('.loadingWrapper').show();
+
+
+
+    });
+
+    function DrawColumnChart(series,containerId,questionText,subQuestionText) {
+
+            $('#'+containerId).highcharts({
+          chart: {
+        type: 'column'
+    },
+                title: {
+                    text: '<span style="white-space:normal !important;word-break: break-all !important;">'+questionText+'</span>',
+                     style: {
+                    font: 'bold 10pt "Arial Narrow"',
+                    color: 'rgb(0,0,0)',
+                    wordWrap:'break-word',
+      // Add these
+                    width : "200px"
+                }
+                },
+                 subtitle: {
+                    text: '<span style="white-space:normal !important;word-break: break-all !important;">'+subQuestionText+'</span>'
+                },
+                  accessibility: {
+        announceNewData: {
+            enabled: true
+        }
+    }, xAxis: {
+        type: 'category'
+    },
+    yAxis: {
+        title: {
+            text: 'Total percent market share'
+        }
+
+    },
+    legend: {
+        enabled: false
+    },
+    plotOptions: {
+        series: {
+            borderWidth: 0,
+            dataLabels: {
+                enabled: true,
+                format: '{point.y:.1f}%'
+            }
+        }
+    },
+                tooltip: {
+                    pointFormat: '{series.name}'
+                },
+
+
+                series: [{
+                    name: "",
+                    colorByPoint: true,
+                    data: series
+                }]
+            });
+    }
+
+    function DrawPieChart(series,containerId,questionText,subQuestionText) {
+
+            $('#'+containerId).highcharts({
+          chart: {
+        plotBackgroundColor: null,
+        plotBorderWidth: null,
+        plotShadow: false,
+        type: 'pie'
+    },
+              title: {
+                   text: '<span style="white-space:normal !important;word-break: break-all !important;">'+questionText+'</span>',
+                   style: {
+                    font: 'bold 10pt "Arial Narrow"',
+                    color: 'rgb(0,0,0)',
+                    wordWrap:'break-word',
+      // Add these
+                    width : "200px"
+                }
+                },
+                 subtitle: {
+                      text: '<span style="white-space:normal !important;word-break: break-all !important;">'+subQuestionText+'</span>'
+                },
+                  accessibility: {
+        announceNewData: {
+            enabled: true
+        }
+    }, xAxis: {
+        type: 'category'
+    },
+    yAxis: {
+        title: {
+            text: 'Total percent market share'
+        }
+
+    },
+    legend: {
+        enabled: false
+    },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+            }
+        }
+    },
+                tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+
+
+                series: [{
+                    name: "",
+                    colorByPoint: true,
+                    data: series
+                }]
+            });
+    }
+
+     function DrawPyramidChart(series,containerId,questionText,subQuestionText) {
+
+            $('#'+containerId).highcharts({
+          chart: {
+                     type: 'pyramid'
+    },
+                title: {
+                        text: '<span style="white-space:normal !important;word-break: break-all !important;">'+questionText+'</span>',
+                    x: -50,
+                      style: {
+                    font: 'bold 10pt "Arial Narrow"',
+                    color: 'rgb(0,0,0)',
+                    wordWrap:'break-word',
+      // Add these
+                    width : "200px"
+                }
+                },
+
+                 subtitle: {
+                     text: '<span style="white-space:normal !important;word-break: break-all !important;">'+subQuestionText+'</span>'
+                },
+                   plotOptions: {
+        series: {
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b> ({point.y:,.0f})',
+                softConnector: true
+            },
+            center: ['40%', '50%'],
+            width: '80%'
+        }
+                },
+                   legend: {
+        enabled: false
+    },
+                tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+
+
+                series: [{
+                    name: "",
+                    colorByPoint: true,
+                    data: series
+                }]
+            });
+    }
+
+
+
+    function DrawPie3dChart(series,containerId,questionText,subQuestionText) {
+
+            $('#'+containerId).highcharts({
+          chart: {
+        plotBackgroundColor: null,
+        plotBorderWidth: null,
+        plotShadow: false,
+                    type: 'pie',
+        options3d: {
+            enabled: true,
+            alpha: 45,
+            beta: 0
+        }
+    },
+               title: {
+                      text: '<span style="white-space:normal !important;word-break: break-all !important;">'+questionText+'</span>',
+                    style: {
+                    font: 'bold 10pt "Arial Narrow"',
+                    color: 'rgb(0,0,0)',
+                    wordWrap:'break-word',
+      // Add these
+                    width : "200px"
+                }
+                },
+                 subtitle: {
+                      text: '<span style="white-space:normal !important;word-break: break-all !important;">'+subQuestionText+'</span>'
+                },
+                  accessibility: {
+        announceNewData: {
+            enabled: true
+        }
+    }, xAxis: {
+        type: 'category'
+    },
+    yAxis: {
+        title: {
+            text: 'Total percent market share'
+        }
+
+    },
+    legend: {
+        enabled: false
+    },
+    plotOptions: {
+        pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+            }
+        }
+    },
+                tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+
+
+                series: [{
+                    name: "",
+                    colorByPoint: true,
+                    data: series
+                }]
+            });
+    }
+
+    function DrawPyramid3dChart(series,containerId,questionText,subQuestionText) {
+
+            $('#'+containerId).highcharts({
+          chart: {
+                     type: 'pyramid3d',
+        options3d: {
+            enabled: true,
+            alpha: 10,
+            depth: 50,
+            viewDistance: 50
+        }
+    },
+                title: {
+                       text: '<span style="white-space:normal !important;word-break: break-all !important;">'+questionText+'</span>',
+                    x: -50,
+                      style: {
+                    font: 'bold 10pt "Arial Narrow"',
+                    color: 'rgb(0,0,0)',
+                    wordWrap:'break-word',
+      // Add these
+                    width : "200px"
+                }
+                },
+                 subtitle: {
+                     text: '<span style="white-space:normal !important;word-break: break-all !important;">'+subQuestionText+'</span>'
+                },
+                   plotOptions: {
+        series: {
+            dataLabels: {
+                enabled: true,
+                format: '<b>{point.name}</b> ({point.y:,.0f})',
+                softConnector: true
+            },
+            center: ['40%', '50%'],
+            width: '80%'
+        }
+                },
+                   legend: {
+        enabled: false
+    },
+                tooltip: {
+        pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+    },
+
+
+                series: [{
+                    name: "",
+                    colorByPoint: true,
+                    data: series
+                }]
+            });
+    }
+
+    function removeSpecialMenu() {
+        debugger;
+        $(".highcharts-menu-item").each(function () {
+            var menuText = $(".highcharts-menu-item").text();
+            debugger;
+            if (menuText == "View in full screen") {
+                $(this).css("display", "none");
+            }
+        });
+    }
+
+    function DrawColumn3dChart(series,containerId,questionText,subQuestionText) {
+
+            $('#'+containerId).highcharts({
+          chart: {
+                    type: 'column',
+               options3d: {
+            enabled: true,
+            alpha: 10,
+            beta: 25,
+            depth: 70
+        }
+    },
+                title: {
+                        text: '<span style="white-space:normal !important;word-break: break-all !important;">'+questionText+'</span>',
+                     style: {
+                    font: 'bold 10pt "Arial Narrow"',
+                    color: 'rgb(0,0,0)',
+                    wordWrap:'break-word',
+      // Add these
+                    width : "200px"
+                }
+                },
+                 subtitle: {
+                      text: '<span style="white-space:normal !important;word-break: break-all !important;">'+subQuestionText+'</span>'
+                },
+                  accessibility: {
+        announceNewData: {
+            enabled: true
+        }
+    }, xAxis: {
+        type: 'category'
+    },
+    yAxis: {
+        title: {
+            text: 'Total percent market share'
+        }
+
+    },
+    legend: {
+        enabled: false
+    },
+    plotOptions: {
+        series: {
+            borderWidth: 0,
+            dataLabels: {
+                enabled: true,
+                format: '{point.y:.1f}%'
+            }
+        }
+    },
+                tooltip: {
+                    pointFormat: '{series.name}'
+                },
+
+
+                series: [{
+                    name: "",
+                    colorByPoint: true,
+                    data: series
+                }]
+            });
+    }
+
+    function drawChart(series, containerId, questionText, subQuestionText, evaluationChartId) {
+        debugger;
+        if (evaluationChartId == 0) {
+            DrawColumn3dChart(series, containerId, questionText, subQuestionText);
+        }
+        if (evaluationChartId == 1) {
+            DrawColumnChart(series, containerId, questionText, subQuestionText);
+        }
+        if (evaluationChartId == 2) {
+            DrawPieChart(series,containerId,questionText,subQuestionText)
+        }
+        if (evaluationChartId == 3) {
+            DrawColumn3dChart(series,containerId,questionText,subQuestionText)
+        }
+        if (evaluationChartId == 4) {
+            DrawColumn3dChart(series,containerId,questionText,subQuestionText)
+        }
+        if (evaluationChartId == 5) {
+            DrawPie3dChart(series,containerId,questionText,subQuestionText)
+        }
+        if (evaluationChartId == 6) {
+            DrawPyramid3dChart(series,containerId,questionText,subQuestionText)
+        }
+
+    }
+</script>
+

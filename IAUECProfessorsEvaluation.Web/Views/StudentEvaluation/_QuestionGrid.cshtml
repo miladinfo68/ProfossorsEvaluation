@@ -1,0 +1,112 @@
+﻿<div class="demo-section k-content wide k-rtl">
+
+    @(Html.Kendo().Grid<IAUECProfessorsEvaluation.Web.Models.EvaluationQuestionModel>()
+.Name("grid")
+.Columns(columns =>
+{
+    columns.Bound(c => c.Title).Title("عنوان").Width(400);
+    columns.Bound(c => c.TypeTitle).Title("دسته بندی").Width(70);
+    columns.Bound(c => c.TermText).Title("ترم").Width(70);
+    columns.Template(null).ClientTemplate("<button id=\"editInfoBtn\" class=\"btn btn-primary\" onclick=\"addSubQuestion(#=Id#,#=TermId#)\">درج و ویرایش زیر سوال</button>").Width(50);
+    columns.Template(null).ClientTemplate("<button id=\"editInfoBtn\" class=\"btn btn-primary\" onclick=\"editQuestion(#=Id#,#=TermId#)\">ویرایش</button>").Width(50);
+    columns.Template(null).ClientTemplate("<button class=\"btn btn-danger\" onclick=\"deleteQuestion(#=Id#)\">حذف</button>").Width(40);
+})
+.Sortable()
+.Filterable()
+.Resizable(resize => resize.Columns(true))
+.Pageable(pageable => pageable
+    .Refresh(true)
+    .PageSizes(true)
+    .ButtonCount(5))
+.DataSource(dataSource => dataSource
+    .Ajax()
+    .Read(read => read.Action("GetAllQuestions", "StudentEvaluation", new { name = "test", id = 2 }))
+    .PageSize(5)
+)
+    )
+</div>
+
+<div id="deletModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content" style="border-radius:6px;padding:7px;">
+            <div class="modal-header">
+                <h4 class="modal-title">آیا از حذف مورد انتخاب شده اطمینان دارید؟</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <button class="col-xs-12 col-md-4 btn btn-danger modal-delete-btn">
+                        بله
+                    </button>
+                    <button class="col-xs-12 col-md-4 btn btn-default" data-dismiss="modal">
+                        خیر
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    var questionId = null;
+    var newUrl = '@Url.Action("CreateSubquestion","StudentEvaluation")';
+    var editUrl = '@Url.Action("Edit","StudentEvaluation")';
+    var indexUrl='@Url.Action("IndexQuestion","StudentEvaluation")';
+    var infoId = null;
+    function editQuestion(id,termId) {
+         window.location.href = editUrl + "?questionId=" + id + "&termId=" + termId;
+    }
+    function deleteQuestion(id) {
+        debugger;
+        questionId = id;
+        $('#deletModal').modal('show');
+    }
+    $(".modal-delete-btn").click(function () {
+             $('.loadingWrapper').show();
+        $.ajax({
+            url: '@Url.Action("Delete", "StudentEvaluation")',
+            type: 'GET',
+            beforeSend: function () {
+
+            },
+            data: { questionId: questionId },
+            success: function (html) {
+                 $('.loadingWrapper').hide();
+                window.location.href = indexUrl;
+            },
+            error: function (request, error) {
+                 $('.loadingWrapper').hide();
+                alert("Request: " + JSON.stringify(request));
+            },
+            complete: function () {
+                 $('.loadingWrapper').hide();
+
+            }
+        });
+    });
+
+    function addSubQuestion(id, termId) {
+        window.location.href = newUrl + "?questionId=" + id + "&termId=" + termId;
+        @*$.ajax({
+            url: '@Url.Action("CreateSubquestion", "StudentEvaluation")',
+            type: 'GET',
+            data: {
+                questionId: id
+            },
+            success: function (e) {
+                 window.location.href = newUrl;
+            },
+            error: function (request, error) {
+                alert("Request: " + JSON.stringify(request));
+            },
+            complete: function () {
+                loadingBoxStop()
+            }
+        });*@
+    }
+
+     $("#NewQuestion").click(function () {
+         var createUrl = '@Url.Action("Create","StudentEvaluation")';
+         window.location.href = createUrl;
+    });
+</script>

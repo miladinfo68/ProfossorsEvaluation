@@ -1,0 +1,236 @@
+﻿@using IAUECProfessorsEvaluation.Data.ReportModel
+@model List<GroupReportModel>
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "گزارش گروه های آموزشی";
+    Layout = "~/Views/Shared/_Layout2.cshtml";
+    var pageSize = 20;
+    var modelcount = Model.FirstOrDefault()?.FlawIndicatiors != null ? Model.FirstOrDefault()?.FlawIndicatiors.Count : 0;
+
+    var modelWar = Model.FirstOrDefault()?.FlawIndicatiors;
+
+
+}
+
+
+<br />
+@if (modelcount > 0)
+{
+    <div class="row" style="margin: 0 auto">
+        <div class="row alert alert-warning">
+            <h4>اطلاعات وارده گروه ها برای شاخص های ذیل دارای نقص می باشد</h4>
+            <div class="col-xs-6">
+                <ul>
+                    @for (var i = 0; i < (modelcount - modelcount / 2); i++)
+                    {
+                        <li>
+                            @if (modelWar != null)
+                            {
+                                @modelWar[i]
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div class="col-xs-6">
+                <ul>
+                    @for (var j = (modelcount - 1); j > (modelcount / 2); j--)
+                    {
+                        if (!((modelcount / 2) == 0 && (modelcount - 1) == 0) && modelWar != null)
+                        {
+                            <li>
+
+                                @modelWar[j.Value]
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="row alert alert-info" style="background-color: rgb(42, 63, 84);border-color: rgba(42, 63, 84,.88);">
+            <h4 style="text-align: center">رتبه بندی گروه های آموزشی</h4>
+
+        </div>
+
+        <div class="row">
+            @(Html.Kendo().Grid<GroupReportModel>(Model)
+                                          .Name("Generalresualt")
+                                          .Columns(columns =>
+                                          {
+                                              columns.Bound(x => x.RowNumber).ClientTemplate("#= renderNumber1() #").Filterable(false).Sortable(false).Title("ردیف").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                                              columns.Bound(p => p.GroupCode).Title("کد گروه").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                                              columns.Bound(p => p.GroupName).Title("نام گروه").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                                              columns.Bound(p => p.GroupManagerFirstName).Title("نام مدیر گروه").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" }).ClientTemplate("<span># if(GroupManagerFirstName != null){# #=GroupManagerFirstName# #=GroupManagerLastName# #} else {# نامشخص #}#</span>");
+                                              columns.Bound(p => p.CollegeName).Title("نام دانشکده").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                                              columns.Bound(p => p.AvgProfessorScoreGroup).Title("میانگین نمرات اساتید").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                                              columns.Bound(p => p.GroupScore).Title("امتیاز گروه").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                                              columns.Bound(p => p.GroupId).Hidden();
+                                              columns.Command(p => p.Custom("مشاهده").Click("showDetails").DataRouteValues(x =>
+                                              {
+                                                  x.Add(o => o.GroupId);
+                                              }).HtmlAttributes(new { style = "text-align: center;" })).Title("جزئیات").HeaderHtmlAttributes(new { style = "text-align: center;" }).HtmlAttributes(new { style = "text-align: center;" });
+                                          })
+                                          .HtmlAttributes(new { style = "height: 550px;" })
+                                          .Pageable(pageable => pageable
+                                              .Input(true)
+                                              .Numeric(false)
+                                          .Messages(m => m.AllPages("تمام صفحات").Page("صفحه").Of(" ").Display("").Empty("هیچ مقدار").ItemsPerPage("تعداد نسبت به صفحه")))
+                                          .ToolBar(tools => tools.Custom().Text("گزارش با جزئیات").Url(Url.Action("GroupDetailsPrint", "Reports")))
+                                          .ToolBar(tools => tools.Custom().Text("گزارش به صورت کلی").Url(Url.Action("GroupGeneralPrint", "Reports")))
+                                          .ToolBar(tools => tools.Custom().Text("بازگشت به گزارش ساز").Url(Url.Action("Index", "Reports")))
+                                          //.ToolBar(tools => tools.Excel().Text("  خروجی اکسل  ").IconClass("fff k-icon k-i-excel").HtmlAttributes(new { style = "padding-right: 5px;" }))
+                                          //.ToolBar(tools => tools.Custom().Text("خروجی قابل چاپ").IconClass("fff k-icon k-i-pdf").Action("CollegeGeneralPrint", "Reports"))
+                                          .Excel(excel => excel
+                                              .FileName("GroupGeneralExcelExport.xlsx")
+                                              .Filterable(true)
+                                              .AllPages(true))
+                                          .Sortable()
+                                          .Events(events =>
+                                          {
+                                              events.Change("resetRowNumber1")
+                                                  .Sort("onSorting1")
+                                                  .Filter("onFiltering1")
+                                                  .Page("onPaging1");
+                                          })
+                                          .Scrollable(scr => scr.Height(430))
+                                          .Filterable(filterable => filterable.Operators(
+                                              operators => operators.ForString(
+                                                  str => str.Clear()
+                                                      .Contains("شامل")
+                                                      .DoesNotContain("شامل نیست")
+                                                      .IsEqualTo("برابر")
+                                                      .IsNotEqualTo("برابر نیست")
+                                                  )
+                                                  .ForNumber(num => num.Clear()
+                                                      .IsEqualTo("برابر")
+                                                      .IsNotEqualTo("برابر نیست")
+                                                      .IsGreaterThan("بزرگتر")
+                                                      .IsGreaterThanOrEqualTo("بزرگتر مساوی")
+                                                      .IsLessThan("کوچکتر")
+                                                      .IsLessThanOrEqualTo("کوچکتر مساوی")
+                                                  )
+
+                                              ).Messages(msg => msg.And("و").Clear("پاک").Filter("فیلتر").Or("یا").Info("جستجو:")))
+                                          .DataSource(dataSource => dataSource
+                                              .Ajax()
+                                              .PageSize(pageSize)
+                                              .ServerOperation(false)
+                                          )
+            )
+        </div>
+    </div>
+</div>
+
+
+
+@(Html.Kendo().Window().Name("Details")
+                .Title("جزئیات")
+                .Visible(false)
+                .Modal(true)
+                .Draggable(true)
+                  .Scrollable(true)
+                  .Height(600)
+
+                .Width(800)
+
+)
+
+<script type="text/x-kendo-template" id="template">
+    <div id="details-container">
+    </div>
+</script>
+
+<script type="text/javascript">
+    var detailsTemplate = kendo.template($("#template").html());
+
+    function showDetails(e) {
+        e.preventDefault();
+
+        var dataItem = this.dataItem($(e.currentTarget).closest("tr"));
+
+                    $.ajax({
+                    url: '@Url.Action("GroupDetails", "Reports")',
+                    type: 'Get',
+                    data: { 'groupId': dataItem["GroupId"] }
+                })
+                .done(function (resualt) {
+                var wnd = $("#Details").data("kendoWindow");
+                wnd.content(resualt);
+                wnd.center().open();
+
+                });
+
+
+    }
+</script>
+
+<style type="text/css">
+    #details-container {
+        padding: 10px;
+    }
+
+    .k-window-actions {
+        left: .3em;
+        right: initial !important;
+    }
+
+    #details-container h2 {
+        margin: 0;
+    }
+
+    #details-container em {
+        color: #8c8c8c;
+    }
+
+    #details-container dt {
+        margin: 0;
+        display: inline;
+    }
+</style>
+
+
+<script type="text/javascript">
+    function error_handler(e) {
+        alert("Server error");
+    }
+    var rowNumber = 0;
+    var rowNumber1 = 0;
+
+    function resetRowNumber() {
+        rowNumber = 0;
+    }
+    function resetRowNumber1() {
+        rowNumber1 = 0;
+    }
+    function renderNumber() {
+        return ++rowNumber;
+    }
+    function renderNumber1() {
+        return ++rowNumber1;
+    }
+    function onSorting(arg) {
+        resetRowNumber();
+    }
+    function onSorting1(arg) {
+        resetRowNumber1();
+    }
+    function onFiltering(arg) {
+        resetRowNumber();
+    }
+    function onFiltering1(arg) {
+        resetRowNumber1();
+    }
+    function onPaging(arg) {
+        rowNumber = (arg.page - 1) * @pageSize;
+    }
+    function onPaging1(arg) {
+        rowNumber1 = (arg.page - 1) * @pageSize;
+    }
+</script>

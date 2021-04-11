@@ -1,0 +1,90 @@
+﻿@{Layout = "~/Views/Shared/_BlankLayout.cshtml";}
+@model IAUECProfessorsEvaluation.Model.Models.Score
+
+@{
+    var index = "row" + @ViewBag.indexr.ToString();
+    var removeScoreForIndicator = "remove" + @ViewBag.indexr.ToString();
+    var addScoreForIndicator = "add" + @ViewBag.indexr.ToString();
+}
+@using (Html.BeginForm())
+{
+    <div class="grid-wrap">
+        <table class="table table-striped grid-table" style="text-align: center">
+            <thead>
+                <tr>
+                    <th class="grid-header">
+                        <div class="grid-header-title">
+                            <span>عنوان</span>
+                        </div>
+                    </th>
+                    <th class="grid-header">
+
+                        <div class="grid-header-title">
+                            <span>شروع بازه</span>
+                        </div>
+                    </th>
+                    <th class="grid-header">
+
+                        <div class="grid-header-title">
+                            <span>پایان بازه</span>
+                        </div>
+                    </th>
+                    <th class="grid-header">
+                        <div class="grid-header-title">
+                            <span>امتیاز</span>
+                        </div>
+                    </th>
+                    <th class="grid-header">
+
+                        <div class="grid-header-title">
+                            <span>عملیات</span>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="tr1" class="grid-row">
+                    <td class="grid-cell">
+                        @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                    </td>
+                    <td class="grid-cell">
+                        @Html.EditorFor(model => model.MinValue, new { htmlAttributes = new { @class = "form-control" } })
+                    </td>
+                    <td class="grid-cell">
+                        @Html.EditorFor(model => model.MaxValue, new { htmlAttributes = new { @class = "form-control" } })
+                    </td>
+                    <td class="grid-cell">
+                        @Html.EditorFor(model => model.Point, new { htmlAttributes = new { @class = "form-control" } })
+                    </td>
+                    <td class="grid-cell">
+                        <a id="@addScoreForIndicator" class="btn btn-success"><i class="fa fa-save "></i></a>
+                        <a id="@removeScoreForIndicator" style="display: none" class="btn btn-danger"><i class="fa fa-remove "></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+}
+
+<script type="text/javascript">
+    $(function () {
+        $(document).on('click', "#" + "@addScoreForIndicator", function () {
+            var name = $('#tr1 #Name').val();
+            var point = $('#tr1 #Point').val();
+            var minValue = $('#tr1 #MinValue').val();
+            var maxValue = $('#tr1 #MaxValue').val();
+            $.post('@Url.Action("AddScoreInSession")',
+                { name: name, maxValue: maxValue, minValue: minValue, point: point, id: 1 }, function () {
+                    $("#" + "@addScoreForIndicator").css("display", "none");
+                    $("#" + "@removeScoreForIndicator").removeAttr("style");
+                });
+        });
+        $(document).on('click', "#" + "@removeScoreForIndicator", function () {
+            $.post('@Url.Action("RemoveScoreInSession")',
+                { id: 1 },
+                function () {
+                    $("#tr1").css("display", "none");
+                });
+        });
+    });
+</script>
